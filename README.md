@@ -34,3 +34,36 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Nháp thử Use case diagram bằng Mermaid
+
+```mermaid
+graph TD
+  %% Các Actor
+  Customer["👤 Customer"] 
+  Admin["👤 Admin"]
+  Staff["👤 Staff"]
+
+  %% Các Use Case chính
+  UC_Register["📝 Register"]
+  UC_Login["🔑 Login"]
+  UC_BookField["📅 Book a Field"]
+  UC_CancelBooking["❌ Cancel Booking"]
+  UC_ManageFields["🏟️ Manage Fields"]
+  UC_ManageSchedules["📆 Manage Schedules"]
+  UC_ProcessPayments["💳 Process Payments"]
+  UC_ViewReports["📊 View Reports"]
+
+  %% Mối quan hệ giữa Actor và Use Case
+  Customer --> UC_Register
+  Customer --> UC_Login
+  Customer --> UC_BookField
+  Customer --> UC_CancelBooking
+  Customer --> UC_ProcessPayments
+
+  Admin --> UC_ManageFields
+  Admin --> UC_ManageSchedules
+  Admin --> UC_ViewReports
+
+  Staff --> UC_ManageFields
+```
