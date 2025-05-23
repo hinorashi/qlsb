@@ -1,69 +1,307 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hệ thống cho thuê sân bóng mini
 
-## Getting Started
+Tiếp cận: data driven development:
+- Phân tích yêu cầu
+- Thiết kế Use case diagram
+- Thiết kế kiến trúc tổng quan hệ thống và công nghệ sử dụng
+- Thiết kế ERD và Database
+- Thiết kế API
+- Thiết kế UI/UX
 
-First, run the development server:
+## I. Usecase
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Nháp thử Use case diagram bằng Mermaid
+### 1. Use case diagram tổng quan
 
 ```mermaid
 graph TD
-  %% Các Actor
-  Customer["👤 Customer"] 
-  Admin["👤 Admin"]
-  Staff["👤 Staff"]
+    actor1((Khách hàng))
+    actor2((Nhân viên))
+    actor3((Quản lý))
 
-  %% Các Use Case chính
-  UC_Register["📝 Register"]
-  UC_Login["🔑 Login"]
-  UC_BookField["📅 Book a Field"]
-  UC_CancelBooking["❌ Cancel Booking"]
-  UC_ManageFields["🏟️ Manage Fields"]
-  UC_ManageSchedules["📆 Manage Schedules"]
-  UC_ProcessPayments["💳 Process Payments"]
-  UC_ViewReports["📊 View Reports"]
+    subgraph UseCases
+        UC1["Thuê sân (đặt sân)"]
+        UC2["Nhận phiếu đặt sân"]
+        UC3["Cập nhật mặt hàng đã dùng"]
+        UC4["Thanh toán"]
+        UC5["Nhận hóa đơn"]
+        UC6["Quản lý sân bóng"]
+        UC7["Quản lý mặt hàng"]
+        UC8["Thống kê doanh thu"]
+        UC9["Nhập hàng từ nhà cung cấp"]
+    end
 
-  %% Mối quan hệ giữa Actor và Use Case
-  Customer --> UC_Register
-  Customer --> UC_Login
-  Customer --> UC_BookField
-  Customer --> UC_CancelBooking
-  Customer --> UC_ProcessPayments
+    actor1 --> UC1
+    UC1 --> UC2
+    actor1 --> UC4
+    UC4 --> UC5
 
-  Admin --> UC_ManageFields
-  Admin --> UC_ManageSchedules
-  Admin --> UC_ViewReports
+    actor2 --> UC1
+    actor2 --> UC3
+    actor2 --> UC4
 
-  Staff --> UC_ManageFields
+    actor3 --> UC6
+    actor3 --> UC7
+    actor3 --> UC8
+    actor3 --> UC9
+
+    %% Coloring
+    classDef Red fill:#ffcccc, stroke:#ff0000, stroke-width:2px
+    classDef Blue fill:#cce5ff, stroke:#0033cc, stroke-width:2px
+    classDef Green fill:#ccffcc, stroke:#009900, stroke-width:2px
+
+    class actor1,actor2,actor3 Red
+    class UC8 Green
+    class UC1 Blue
 ```
+
+**📝 Giải thích sơ bộ:**
+
+Khách hàng có thể:
+- Đặt sân
+- Nhận phiếu đặt sân
+- Thanh toán và nhận hóa đơn
+
+Nhân viên có vai trò trung gian thực hiện thao tác:
+- Đặt sân thay khách
+- Cập nhật mặt hàng đã dùng mỗi buổi
+- Xử lý thanh toán
+
+Quản lý:
+- Quản lý thông tin sân bóng
+- Nhập và quản lý mặt hàng
+- **Xem thống kê doanh thu**
+- Nhập hàng từ nhà cung cấp
+
+### 2. Use case diagram chi tiết cho chức năng Thống kê doanh thu
+
+```mermaid
+graph TD
+    subgraph "Tính năng thống kê doanh thu"
+    TK[Thống kê doanh thu]
+    end
+
+    subgraph "Tính năng tạo dữ liệu"
+        TT[Thanh toán] --> TK
+        MH[Mặt hàng đã dùng] --> TK
+        DS[Đặt sân] --> TK
+    end
+
+    subgraph "Nguồn dữ liệu"
+        HD[Hóa đơn]
+        CTMH[Chi tiết mặt hàng]
+        SB[Thông tin sân]
+        KH[Thông tin khách hàng]
+        NCC[Nhập hàng NCC]
+    end
+
+    HD --> TK
+    CTMH --> TK
+    SB --> TK
+    KH --> TK
+    NCC --> TK
+
+    subgraph "Thành phần hệ thống"
+        API[API Thống kê] --> TK
+        UI[Giao diện thống kê] --> API
+    end
+```
+
+#### Dữ liệu đầu vào
+
+| Nguồn dữ liệu                | Mô tả chi tiết                                                                                                                      |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Hóa đơn thanh toán**       | Bao gồm thông tin: khách hàng, sân thuê, thời gian, chi phí thuê, mặt hàng sử dụng, số tiền đã trả. Đây là nguồn chính để thống kê. |
+| **Mặt hàng ăn uống đã dùng** | Được cập nhật từ chức năng "Checkout buổi thuê" sau khi khách đá xong, dùng để thống kê doanh thu từ dịch vụ kèm theo.              |
+| **Thông tin sân bóng**       | Để phân tích doanh thu theo từng sân mini/lớn.                                                                                      |
+| **Thông tin khách hàng**     | Phục vụ phân loại doanh thu theo nhóm KH nếu cần (cá nhân, tổ chức, thuê theo tháng...).                                            |
+
+#### Các tính năng liên quan
+
+| Tính năng                     | Mối liên hệ                                                                                         |
+| ----------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Thanh toán**                | Là nơi tạo ra dữ liệu hóa đơn, quyết định thời gian - số tiền cần ghi nhận trong thống kê.          |
+| **Cập nhật mặt hàng đã dùng** | Ảnh hưởng đến phần doanh thu từ dịch vụ phụ trợ (nước uống, đồ ăn).                                 |
+| **Đặt sân**                   | Tác động gián tiếp đến thống kê bằng cách tạo ra dự kiến thu (nếu muốn phân tích hiệu quả đặt sân). |
+| **Nhập hàng từ nhà cung cấp** | Nếu hệ thống tính lợi nhuận = doanh thu - chi phí thì cần dùng dữ liệu nhập hàng để phân tích.      |
+| **Giao diện thống kê (UI)**   | Cho phép quản lý chọn khoảng thời gian (tháng, quý, năm), xem bảng thống kê và chi tiết hóa đơn.    |
+| **API thống kê (Backend)**    | Nhận yêu cầu thống kê từ UI, truy vấn DB, tổng hợp dữ liệu, trả về kết quả.                         |
+
+#### Phụ thuộc hệ thống
+
+CSDL:
+- Bảng `hoa_don` (invoice)
+- Bảng `chi_tiet_mat_hang_da_dung`
+- Bảng `san_bong`, `khach_hang`, `mat_hang`, `nha_cung_cap`
+
+API:
+- `GET /thong-ke?type=thang&year=2025`
+- `GET /hoa-don?from=2025-04-01&to=2025-04-30`
+
+UI/UX:
+- Dropdown chọn tháng/quý/năm
+- Bảng tổng hợp doanh thu
+- Bảng chi tiết hóa đơn trong từng dòng thống kê
+
+## II. Kiến trúc tổng quan hệ thống
+
+```mermaid
+graph TD
+    User["Người dùng"]
+    FE["FE <br/> (React + Next.js)"]
+    BE["BE <br/> (Node.js + Express.js)"]
+    DB["DB <br/> (Sqlite)"]
+
+    User --> FE --> BE --> DB
+```
+
+Lựa chon công nghệ:
+
+### 1. DB
+
+**Câu hỏi:** nên dùng SQL hay NoSQL?
+
+| Tiêu chí                       | SQL (SQLite)                                                                                          | NoSQL (MongoDB)                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Tính chất dữ liệu**          | Có cấu trúc rõ ràng, nhiều quan hệ (relationship)                                                     | Dữ liệu bán cấu trúc, thiên về document                          |
+| **Sự phù hợp với nghiệp vụ**   | Tuyệt vời: hệ thống có **hợp đồng, phiếu đặt sân, hóa đơn, mặt hàng, khách hàng**, nhiều ràng buộc FK | Không tối ưu: sẽ phải dùng join bằng code, mất ràng buộc dữ liệu |
+| **Khả năng truy vấn thống kê** | Rất mạnh nhờ SQL (`GROUP BY`, `JOIN`, `SUM`, `DATE_TRUNC`,...)                                        | Có aggregation nhưng phức tạp và verbose                         |
+| **Mức độ thay đổi cấu trúc**   | Ràng buộc chặt → dễ kiểm soát                                                                         | Linh hoạt → dễ lộn xộn nếu không kiểm soát                       |
+| **Dễ debug & maintain**        | Cao                                                                                                   | Thấp hơn nếu dữ liệu bị lồng sâu                                 |
+| **Công cụ hỗ trợ**             | Phong phú (ERD tool, SQL Studio, DB Browser)                                                          | Có nhưng thiên về developer, ít hỗ trợ quản trị tổng thể         |
+
+**Kết luận:** 
+- **SQL** là lựa chọn tốt hơn cho hệ thống này vì bài toán thiên về dữ liệu dạng bảng và có quan hệ chặt, có nhiều ràng buộc dữ liệu, cần tính toán thống kê và liên kết nhiều bảng.
+- **SQLite** là lựa chọn đơn giản và dễ tiếp cận, có thể chuyển sang PostgreSQL hoặc MS SQL Server sau này nếu cần.
+
+### 2. Backend
+
+**Công nghệ:** Node.js + Express.js
+
+**Lý do chọn lựa:**
+- **Node.js**: Nền tảng JavaScript phổ biến, dễ dàng mở rộng và có hiệu suất cao cho các ứng dụng I/O.
+- **Express.js**: Framework nhẹ cho Node.js, giúp xây dựng API nhanh chóng và dễ dàng.
+
+### 3. Frontend
+
+**Công nghệ:** React + Next.js
+
+**Lý do chọn lựa:**
+- **React**: Thư viện JavaScript phổ biến cho việc xây dựng giao diện người dùng, cho phép tái sử dụng component.
+- **Next.js**: Framework cho React, hỗ trợ SSR (Server-Side Rendering) và tối ưu hóa hiệu suất.
+
+## III. Thiết kế ERD và Database
+
+### 1. Tóm tắt các thực thể chính (Entities)
+
+| Thực thể                    | Vai trò                                                            |
+| --------------------------- | ------------------------------------------------------------------ |
+| `khach_hang`                | Người thuê sân                                                     |
+| `san_bong`                  | Thông tin các sân mini/lớn                                         |
+| `phieu_dat_san`             | Phiếu xác nhận đặt sân của khách hàng                              |
+| `chi_tiet_dat_san`          | Một dòng đặt sân cụ thể: sân nào, khung giờ, ngày bắt đầu/kết thúc |
+| `hoa_don`                   | Hóa đơn thanh toán cuối kỳ                                         |
+| `mat_hang`                  | Đồ ăn, nước uống bán kèm                                           |
+| `chi_tiet_su_dung_mat_hang` | Danh sách mặt hàng sử dụng mỗi buổi                                |
+| `nha_cung_cap`              | Nguồn cung cấp mặt hàng                                            |
+| `phieu_nhap_hang`           | Hóa đơn nhập hàng                                                  |
+| `chi_tiet_phieu_nhap`       | Mặt hàng nhập cụ thể của 1 phiếu                                   |
+
+```mermaid
+erDiagram
+    khach_hang {
+        INT id PK
+        STRING ho_ten
+        STRING sdt
+        STRING email
+    }
+
+    san_bong {
+        INT id PK
+        STRING ten_san
+        STRING loai_san
+        STRING mo_ta
+    }
+
+    phieu_dat_san {
+        INT id PK
+        INT khach_hang_id FK
+        DATE ngay_dat
+        FLOAT tong_tien_du_kien
+        FLOAT tien_dat_coc
+    }
+
+    chi_tiet_dat_san {
+        INT id PK
+        INT phieu_dat_san_id FK
+        INT san_bong_id FK
+        TIME khung_gio
+        DATE ngay_bat_dau
+        DATE ngay_ket_thuc
+        FLOAT gia_thue_mot_buoi
+    }
+
+    hoa_don {
+        INT id PK
+        INT phieu_dat_san_id FK
+        DATE ngay_thanh_toan
+        FLOAT tong_tien
+        FLOAT so_tien_thuc_tra
+        FLOAT so_tien_con_lai
+    }
+
+    mat_hang {
+        INT id PK
+        STRING ten
+        STRING don_vi
+        FLOAT gia_ban
+    }
+
+    chi_tiet_su_dung_mat_hang {
+        INT id PK
+        INT hoa_don_id FK
+        DATE ngay_su_dung
+        INT mat_hang_id FK
+        INT so_luong
+        FLOAT gia_ban
+        FLOAT thanh_tien
+    }
+
+    nha_cung_cap {
+        INT id PK
+        STRING ten
+        STRING dia_chi
+        STRING email
+        STRING dien_thoai
+        STRING mo_ta
+    }
+
+    phieu_nhap_hang {
+        INT id PK
+        INT nha_cung_cap_id FK
+        DATE ngay_nhap
+    }
+
+    chi_tiet_phieu_nhap {
+        INT id PK
+        INT phieu_nhap_hang_id FK
+        INT mat_hang_id FK
+        INT so_luong
+        FLOAT don_gia
+        FLOAT thanh_tien
+    }
+
+    khach_hang ||--o{ phieu_dat_san : dat
+    phieu_dat_san ||--o{ chi_tiet_dat_san : gom
+    san_bong ||--o{ chi_tiet_dat_san : duoc_dat
+    phieu_dat_san ||--|| hoa_don : tao_hoa_don
+    hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
+    mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
+    nha_cung_cap ||--o{ phieu_nhap_hang : cung_cap
+    phieu_nhap_hang ||--o{ chi_tiet_phieu_nhap : co
+    mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
+```
+
+Chú thích:
+- Các bảng `chi_tiet_*` cho phép mô hình hóa 1-nhiều linh hoạt và rõ ràng.
+- `hoa_don` tách riêng khỏi `phieu_dat_san` để phản ánh biến động phát sinh thực tế (thêm buổi, đồ ăn...).
+- `mat_hang` có thể dùng chung cho cả bán lẻ và nhập kho, nhờ phân biệt qua `chi_tiet_su_dung_mat_hang` và `chi_tiet_phieu_nhap`.
