@@ -206,6 +206,8 @@ Lựa chon công nghệ:
 | `phieu_nhap_hang`           | Hóa đơn nhập hàng                                                  |
 | `chi_tiet_phieu_nhap`       | Mặt hàng nhập cụ thể của 1 phiếu                                   |
 
+### 2. Thiết kế ERD
+
 ```mermaid
 erDiagram
     khach_hang {
@@ -305,3 +307,51 @@ Chú thích:
 - Các bảng `chi_tiet_*` cho phép mô hình hóa 1-nhiều linh hoạt và rõ ràng.
 - `hoa_don` tách riêng khỏi `phieu_dat_san` để phản ánh biến động phát sinh thực tế (thêm buổi, đồ ăn...).
 - `mat_hang` có thể dùng chung cho cả bán lẻ và nhập kho, nhờ phân biệt qua `chi_tiet_su_dung_mat_hang` và `chi_tiet_phieu_nhap`.
+
+### 3. Thiết kế Database
+
+Tham khảo file [schema.sql](db/schema.sql) để biết chi tiết về cấu trúc bảng và các ràng buộc.
+
+### 4. Truy vấn mẫu phục vụ thống kê doanh thu
+
+📅 Doanh thu theo tháng:
+```sql
+SELECT 
+    strftime('%Y-%m', ngay_thanh_toan) AS thang,
+    SUM(tong_tien) AS tong_doanh_thu
+FROM hoa_don
+GROUP BY thang
+ORDER BY thang DESC;
+```
+
+🧾 Chi tiết hóa đơn trong một tháng:
+```sql
+SELECT
+    hd.id AS hoa_don_id,
+    kh.ho_ten AS ten_khach,
+    sb.ten_san,
+    hd.ngay_thanh_toan,
+    hd.tong_tien
+FROM hoa_don hd
+JOIN phieu_dat_san pds ON pds.id = hd.phieu_dat_san_id
+JOIN khach_hang kh ON kh.id = pds.khach_hang_id
+JOIN chi_tiet_dat_san ctds ON ctds.phieu_dat_san_id = pds.id
+JOIN san_bong sb ON sb.id = ctds.san_bong_id
+WHERE strftime('%Y-%m', hd.ngay_thanh_toan) = '2025-04';
+```
+
+🍹 Doanh thu từ mặt hàng:
+```sql
+SELECT
+    mh.ten,
+    SUM(c.soluong) AS tong_so_luong,
+    SUM(c.thanh_tien) AS tong_doanh_thu
+FROM chi_tiet_su_dung_mat_hang c
+JOIN mat_hang mh ON mh.id = c.mat_hang_id
+GROUP BY mh.id
+ORDER BY tong_doanh_thu DESC;
+```
+
+Dữ liệu mẫu tham khảo trong file [seed.sql](db/seed.sql).
+
+Clean data tham khảo file [clean.sql](db/clean.sql).
