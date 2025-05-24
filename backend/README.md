@@ -34,7 +34,7 @@ node server.js
 # Thống kê doanh thu theo tháng trong năm 2025
 GET http://localhost:3000/api/thong-ke?type=thang&nam=2025
 # Chi tiết doanh thu theo tháng trong năm 2025
-GET http://localhost:3000/api/thong-ke/chi-tiet?type=thang&value=2025-04
+GET http://localhost:3000/api/thong-ke/chi-tiet?type=thang&thoigian=2025-04
 ```
 
 Thống kê theo kì:
@@ -43,6 +43,6 @@ Thống kê theo kì:
 - Theo năm: http://localhost:3000/api/thong-ke?type=nam&nam=2025
 
 Chi tiết hóa đơn trong kì:
-- Theo tháng: http://localhost:3000/api/thong-ke/chi-tiet?type=thang&value=2025-04
-- Theo quý: http://localhost:3000/api/thong-ke/chi-tiet?type=quy&value=2025-Q2
-- Theo năm: http://localhost:3000/api/thong-ke/chi-tiet?type=nam&value=2025
+- Theo tháng: http://localhost:3000/api/thong-ke/chi-tiet?type=thang&thoigian=2025-04
+- Theo quý: http://localhost:3000/api/thong-ke/chi-tiet?type=quy&thoigian=2025-Q2
+- Theo năm: http://localhost:3000/api/thong-ke/chi-tiet?type=nam&thoigian=2025

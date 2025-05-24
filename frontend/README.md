@@ -5,6 +5,7 @@
 ```sh
 npx create-next-app@latest frontend --js --tailwind --eslint --app --import-alias "@/*" --src-dir --no-experimental-app --turbopack --yes
 cd frontend
+# axios để gọi API, classnames để gộp CSS, date-fns để xử lý ngày tháng.
 npm install axios classnames date-fns
 ```
 
@@ -12,10 +13,19 @@ npm install axios classnames date-fns
 
 ```plaintext
 frontend/
-├── public/                # Thư mục chứa tài nguyên tĩnh
+├── public/                     # Thư mục chứa tài nguyên tĩnh
 ├── src/
-│   ├── components/        # Các component tái sử dụng
-│   ├── pages/             # Các trang của ứng dụng
+│   ├── app/                    # Các trang của ứng dụng
+│   │   └── page.tsx            # Giao diện chính
+│   ├── components/             # Các component tái sử dụng
+│   │   ├── RevenueTable.tsx    # Bảng doanh thu
+│   │   ├── InvoiceDetails.tsx  # Chi tiết hóa đơn
+│   │   └── FilterBar.tsx       # Lọc theo tháng/quý/năm
+│   ├── lib/
+│   │   └── api.ts              # Gọi API
+│   ├── types/
+│   │   └── types.ts            # Định nghĩa kiểu dữ liệu
+├── tailwind.config.js          # Cấu hình Tailwind
 ```
 
 ## III. Tạo trang thống kê
