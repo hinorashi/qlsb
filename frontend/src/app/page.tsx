@@ -6,6 +6,7 @@ import { DoanhThu, HoaDon } from '@/types/types';
 import FilterBar from '@/components/FilterBar';
 import BangDoanhThu from '@/components/BangDoanhThu';
 import ChiTietHoaDon from '@/components/ChiTietHoaDon';
+import BieuDoDoanhThu from '@/components/BieuDoDoanhThu';
 
 export default function HomePage() {
   // State cho chu kỳ, năm, dữ liệu doanh thu, mục đã chọn và chi tiết hóa đơn
@@ -34,6 +35,7 @@ export default function HomePage() {
       <h1 className="text-2xl font-bold mb-4">Thống kê doanh thu</h1>
       {/* Thanh điều khiển chọn chu kỳ và năm */}
       <FilterBar chuki={chuki} setChuki={setChuki} nam={nam} setNam={setNam} />
+      <BieuDoDoanhThu data={revenues} />
       {/* Bảng doanh thu tổng hợp */}
       <BangDoanhThu data={revenues} onSelect={setSelected} selected={selected} />
       {/* Hiển thị chi tiết hóa đơn nếu đã chọn */}

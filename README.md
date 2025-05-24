@@ -386,3 +386,32 @@ _todo_
 ### 2. Giao diện chi tiết hóa đơn
 
 _todo_
+
+## X. Tổng kết
+
+### ✅ Những gì đã thực hiện
+
+| Hạng mục                                                       | Tình trạng | Ghi chú                                       |
+| -------------------------------------------------------------- | ---------- | --------------------------------------------- |
+| Phân tích yêu cầu bài toán từ file                             | ✅          | Đã đọc kỹ từ `yeu-cau.txt`                    |
+| Use Case Diagram bằng Mermaid                                  | ✅          | Có đầy đủ actor + chức năng                   |
+| Lựa chọn hướng thiết kế (SQL vs NoSQL)                         | ✅          | Chọn SQLite (SQL-first, data-driven)          |
+| Thiết kế ERD + Mermaid                                         | ✅          | Chuẩn hóa toàn bộ thực thể, quan hệ           |
+| Sinh schema SQL cho SQLite                                     | ✅          | Dễ triển khai, tối ưu sẵn                     |
+| Truy vấn thống kê doanh thu mẫu                                | ✅          | `GROUP BY` tháng, hóa đơn, mặt hàng           |
+| Seed data năm 2025 (nhiều tháng)                               | ✅          | Gồm cả thuê sân + đồ ăn                       |
+| Tạo REST API bằng Express                                      | ✅          | `GET /thong-ke` + `/thong-ke/chi-tiet`        |
+| Xây dựng frontend React + Next.js                              | ✅          | Giao diện thống kê, lọc, click để xem hóa đơn |
+| Component React: `FilterBar`, `RevenueTable`, `InvoiceDetails` | ✅          | Giao diện tương tác hoàn chỉnh                |
+| Seed dữ liệu mở rộng (2023, 2024)                              | ✅          | Phủ dữ liệu đa niên, rải rác nhiều tháng      |
+
+### ❌ Các tính năng đã gợi ý nhưng CHƯA thực hiện
+
+| Đề xuất                                         | Mô tả                                   | Ghi chú                                          |
+| ----------------------------------------------- | --------------------------------------- | ------------------------------------------------ |
+| 🔒 **Đăng nhập bằng Keycloak (OIDC)**           | Xác thực người dùng (quản lý/nhân viên) | Đã có đề cập đến OIDC trong đầu bài              |
+| 📊 **Biểu đồ doanh thu (Chart)**                | Trực quan hóa doanh thu bằng biểu đồ    | Dùng `recharts` hoặc `chart.js`                  |
+| 🧾 **Xuất PDF báo cáo**                         | In hoặc lưu thống kê doanh thu/hóa đơn  | Dùng `jspdf`, `react-pdf`                        |
+| 📦 **Triển khai Docker**                        | Dockerize backend/frontend              | Tách `backend` (Express) và `frontend` (Next.js) |
+| 🔍 **Lọc nâng cao hóa đơn theo khách hàng/sân** | Lọc hóa đơn theo tên khách/sân cụ thể   | Cần bổ sung param lọc trong API `/chi-tiet`      |
+| 🧪 **Tạo dữ liệu giả lập (faker)**              | Sinh dữ liệu random phục vụ load test   | Dùng `faker.js`, `csvgen`, hoặc script seed động |

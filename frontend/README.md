@@ -30,7 +30,36 @@ frontend/
 
 ## III. Tạo trang thống kê
 
-_todo_
+### 1. So sánh Recharts và Chart.js
+
+So sánh hai thư viện mạnh mẽ: **Recharts** (chuyên React) và **Chart.js** (phổ thông):
+
+| Tiêu chí                  | **Recharts**                | **Chart.js (qua react-chartjs-2)** |
+| ------------------------- | --------------------------- | ---------------------------------- |
+| Dành riêng cho React      | ✅ Rất hợp                  | ❌ Cần wrapper                    |
+| Cú pháp JSX trực quan     | ✅ Rất tốt                  | 😐 Khó hơn                        |
+| Tùy biến kiểu biểu đồ     | Dễ                          | Nhiều, phức tạp                    |
+| Tài liệu chính chủ        | ✅ Có                       | ✅ Có                             |
+| Khả năng mở rộng nâng cao | ⚠️ Hạn chế khi nhiều trục   | ✅ Mạnh mẽ hơn                    |
+
+**Kết luận:** Chọn **Recharts** vì dễ tích hợp, dễ tùy biến, cú pháp JSX giống các component khác.
+
+
+### 2. Cài đặt
+
+```sh
+npm install recharts
+```
+
+Các biểu đồ có thể triển khai:
+
+| Loại biểu đồ | Mô tả                               |
+| ------------ | ----------------------------------- |
+| 📊 BarChart  | Tổng doanh thu theo tháng, quý, năm |
+| 📈 LineChart | Biến động doanh thu theo thời gian  |
+| 🍩 PieChart  | Tỉ lệ doanh thu từ các mặt hàng     |
+| 🧱 AreaChart | So sánh thuê sân vs. đồ ăn          |
+
 
 ## IV. Tích hợp API
 

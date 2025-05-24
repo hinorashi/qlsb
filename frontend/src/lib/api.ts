@@ -2,7 +2,7 @@ import axios from "axios";
 import { DoanhThu, HoaDon } from "@/types/types";
 
 // Địa chỉ backend API thống kê
-const BASE_URL = "http://localhost:3000/api/thong-ke";
+const BASE_URL = "http://localhost:5000/api/thong-ke";
 
 // Hàm lấy dữ liệu doanh thu tổng hợp theo chu kỳ và năm
 export async function fetchRevenue(
