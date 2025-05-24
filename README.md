@@ -1,12 +1,23 @@
 # Hệ thống cho thuê sân bóng mini
 
-Tiếp cận: data driven development:
+Cách tiếp cận:
 1. Phân tích yêu cầu
 2. Thiết kế Use case diagram
 3. Thiết kế kiến trúc tổng quan hệ thống và công nghệ sử dụng
 4. Thiết kế ERD và Database
 5. Thiết kế API
 6. Thiết kế UI/UX
+
+Hoặc tham khảo hướng Data-driven development:
+
+| Giai đoạn                                         | Mục tiêu                                                                    | Kết quả                                                         |
+| ------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **1. Phân tích dữ liệu nghiệp vụ**                | Xác định các **thực thể**, **mối quan hệ**, **nghiệp vụ phát sinh dữ liệu** | Danh sách thực thể: Khách hàng, Hóa đơn, Mặt hàng, Đặt sân, ... |
+| **2. Thiết kế ERD (Entity Relationship Diagram)** | Cấu trúc hóa dữ liệu: bảng, khóa chính, khóa ngoại, ràng buộc               | Sơ đồ ERD chính thức                                            |
+| **3. Thiết kế Physical Database Schema**          | Chuyển ERD thành lược đồ SQL cụ thể (PostgreSQL/MySQL...)                   | Câu lệnh `CREATE TABLE`, ràng buộc FK, chỉ mục                  |
+| **4. Phân tích usecase → truy vấn dữ liệu**       | Đặt câu hỏi: thống kê cần gì? hóa đơn cần dữ liệu nào?                      | Danh sách các truy vấn mẫu, chỉ số cần thống kê                 |
+| **5. Thiết kế API phù hợp dữ liệu**               | Xây dựng API đọc dữ liệu đúng với mô hình                                   | REST/GraphQL APIs rõ ràng, phân trang, lọc                      |
+| **6. UI & Use Case Logic (sau cùng)**             | Thiết kế màn hình để hiện dữ liệu từ DB/APIs                                | Giao diện thống kê, hóa đơn, tìm kiếm khách hàng                |
 
 ## I. Usecase
 
@@ -154,7 +165,7 @@ graph TD
     User --> FE --> BE --> DB
 ```
 
-Lựa chon công nghệ:
+**Lựa chọn công nghệ:**
 
 ### 1. DB
 

@@ -1,15 +1,16 @@
 'use client';
 import React from 'react';
-import { RevenueEntry } from '@/types/types';
+import { DoanhThu } from '@/types/types';
 import clsx from 'classnames';
 
 interface Props {
-  data: RevenueEntry[];
+  data: DoanhThu[];
   onSelect: (val: string) => void;
   selected: string | null;
 }
 
-const RevenueTable: React.FC<Props> = ({ data, onSelect, selected }) => {
+// Bảng hiển thị doanh thu tổng hợp theo kỳ thống kê
+const BangDoanhThu: React.FC<Props> = ({ data, onSelect, selected }) => {
   return (
     <div className="overflow-x-auto border rounded-md">
       <table className="w-full table-auto text-left">
@@ -20,6 +21,7 @@ const RevenueTable: React.FC<Props> = ({ data, onSelect, selected }) => {
           </tr>
         </thead>
         <tbody>
+          {/* Duyệt qua từng dòng dữ liệu doanh thu */}
           {data.map((entry) => (
             <tr
               key={entry.ky_thong_ke}
@@ -27,9 +29,11 @@ const RevenueTable: React.FC<Props> = ({ data, onSelect, selected }) => {
                 'hover:bg-blue-50 cursor-pointer',
                 selected === entry.ky_thong_ke && 'bg-blue-100 font-semibold'
               )}
+              // Khi click vào dòng sẽ chọn kỳ thống kê tương ứng
               onClick={() => onSelect(entry.ky_thong_ke)}
             >
               <td className="p-2">{entry.ky_thong_ke}</td>
+              {/* Hiển thị doanh thu, format số có dấu phẩy */}
               <td className="p-2 text-right">{entry.tong_doanh_thu.toLocaleString()}</td>
             </tr>
           ))}
@@ -39,4 +43,4 @@ const RevenueTable: React.FC<Props> = ({ data, onSelect, selected }) => {
   );
 };
 
-export default RevenueTable;
+export default BangDoanhThu;
