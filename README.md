@@ -1,12 +1,12 @@
 # Hệ thống cho thuê sân bóng mini
 
 Tiếp cận: data driven development:
-- Phân tích yêu cầu
-- Thiết kế Use case diagram
-- Thiết kế kiến trúc tổng quan hệ thống và công nghệ sử dụng
-- Thiết kế ERD và Database
-- Thiết kế API
-- Thiết kế UI/UX
+1. Phân tích yêu cầu
+2. Thiết kế Use case diagram
+3. Thiết kế kiến trúc tổng quan hệ thống và công nghệ sử dụng
+4. Thiết kế ERD và Database
+5. Thiết kế API
+6. Thiết kế UI/UX
 
 ## I. Usecase
 
@@ -355,3 +355,23 @@ ORDER BY tong_doanh_thu DESC;
 Dữ liệu mẫu tham khảo trong file [seed.sql](db/seed.sql).
 
 Clean data tham khảo file [clean.sql](db/clean.sql).
+
+## IV. Thiết kế API
+
+### 1. API thống kê doanh thu
+
+_todo_
+
+### 2. API chi tiết hóa đơn
+
+_todo_
+
+## V. Thiết kế UI/UX
+
+### 1. Giao diện thống kê doanh thu
+
+_todo_
+
+### 2. Giao diện chi tiết hóa đơn
+
+_todo_
