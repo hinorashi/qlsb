@@ -15,11 +15,11 @@ db/
 ├── schema.sql            # Cấu trúc CSDL
 ├── clean.sql             # Reset CSDL
 backend/
-├── db/
-│   └── database.js       # Kết nối SQLite
-├── routes/
-│   └── thongke.js        # API thống kê
-├── server.js             # Main entry point
+├── src/
+│   ├── database.js       # Kết nối SQLite
+│   ├── routes/
+│   │   └── thongke.js    # API thống kê
+│   └── server.js         # Main entry point
 ```
 
 ## III. Chạy server

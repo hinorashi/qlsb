@@ -12,7 +12,7 @@ DELETE FROM san_bong;
 DELETE FROM mat_hang;
 DELETE FROM nha_cung_cap;
 
--- reset ID tự tăng (AUTOINCREMENT
+-- reset ID tự tăng (AUTOINCREMENT)
 DELETE FROM sqlite_sequence WHERE name IN (
   'khach_hang', 'san_bong', 'phieu_dat_san', 'chi_tiet_dat_san',
   'hoa_don', 'mat_hang', 'chi_tiet_su_dung_mat_hang',
