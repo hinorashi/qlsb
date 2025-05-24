@@ -16,17 +16,20 @@ router.get('/', (req, res) => {
     else if (chuki === 'quy') groupBy = "strftime('%Y', ngay_thanh_toan) || '-Q' || ((cast(strftime('%m', ngay_thanh_toan) as integer)-1)/3 +1)";
     else groupBy = "strftime('%Y', ngay_thanh_toan)";
 
-    // Truy vấn tổng doanh thu theo kỳ thống kê
-    const query = `
+    // Nếu không truyền năm thì lấy tất cả các năm
+    let query = `
         SELECT ${groupBy} AS ky_thong_ke,
                SUM(tong_tien) AS tong_doanh_thu
         FROM hoa_don
-        WHERE strftime('%Y', ngay_thanh_toan) = ?
-        GROUP BY ky_thong_ke
-        ORDER BY ky_thong_ke DESC;
     `;
+    let params = [];
+    if (nam) {
+        query += `WHERE strftime('%Y', ngay_thanh_toan) = ?\n`;
+        params.push(nam);
+    }
+    query += `GROUP BY ky_thong_ke\nORDER BY ky_thong_ke DESC;`;
 
-    db.all(query, [nam], (err, rows) => {
+    db.all(query, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
@@ -36,7 +39,8 @@ router.get('/', (req, res) => {
 router.get('/chi-tiet', (req, res) => {
     const { chuki, thoigian } = req.query;
     // Kiểm tra tham số truyền vào
-    if (!chuki || !thoigian) return res.status(400).json({ error: 'Thiếu tham số' });
+    if (!chuki) return res.status(400).json({ error: 'Thiếu tham số chuki' });
+    if (!thoigian) return res.status(400).json({ error: 'Thiếu tham số thoigian' });
 
     let dateFilter;
     switch (chuki) {
@@ -57,7 +61,11 @@ router.get('/chi-tiet', (req, res) => {
             dateFilter = `strftime('%Y', hd.ngay_thanh_toan) = ?`;
             break;
         default:
-            return res.status(400).json({ error: 'Loại thống kê không hợp lệ' });
+            return res.status(400).json({ 
+                error: 'Loại thống kê không hợp lệ',
+                chuki,
+                thoigian
+            });
     }
 
     // Truy vấn chi tiết hóa đơn theo kỳ thống kê
