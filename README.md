@@ -323,7 +323,17 @@ Chú thích:
 
 Tham khảo file [schema.sql](db/schema.sql) để biết chi tiết về cấu trúc bảng và các ràng buộc.
 
-### 4. Truy vấn mẫu phục vụ thống kê doanh thu
+
+### 4. Dữ liệu mẫu
+
+Dữ liệu mẫu tham khảo trong file [seed.sql](db/seed.sql).
+
+Clean data tham khảo file [clean.sql](db/clean.sql).
+
+
+### 5. Truy vấn mẫu 
+
+#### Thống kê doanh thu
 
 📅 Doanh thu theo tháng:
 ```sql
@@ -363,9 +373,54 @@ GROUP BY mh.id
 ORDER BY tong_doanh_thu DESC;
 ```
 
-Dữ liệu mẫu tham khảo trong file [seed.sql](db/seed.sql).
+#### Quản lí sân bóng
 
-Clean data tham khảo file [clean.sql](db/clean.sql).
+Các chức năng:
+- 🔍 Tìm sân bóng theo tên (LIKE keyword)
+- 🧾 Xem chi tiết sân bóng theo ID
+- ✏️ Cập nhật thông tin sân bóng
+- ➕ Thêm mới sân bóng
+- ❌ Xóa sân bóng
+
+**🔍 1. Tìm kiếm sân bóng theo tên**
+
+```sql
+SELECT * FROM san_bong
+WHERE ten_san LIKE '%' || :keyword || '%';
+```
+
+**🧾 2. Xem chi tiết sân bóng theo ID**
+
+```sql
+SELECT * FROM san_bong
+WHERE id = :id;
+```
+
+**✏️ 3. Cập nhật thông tin sân bóng**
+
+```sql
+UPDATE san_bong
+SET ten_san = :ten_san,
+    loai_san = :loai_san,
+    mo_ta = :mo_ta
+WHERE id = :id;
+```
+
+**➕ 4. Thêm mới sân bóng**
+
+```sql
+INSERT INTO san_bong (ten_san, loai_san, mo_ta)
+VALUES (:ten_san, :loai_san, :mo_ta);
+```
+
+**❌ 5. Xóa sân bóng**
+
+```sql
+DELETE FROM san_bong
+WHERE id = :id;
+```
+
+**⚠️ Lưu ý:** Nên kiểm tra xem sân có đang được sử dụng trong các phiếu đặt sân trước khi xoá.
 
 ## IV. Thiết kế API
 
