@@ -80,7 +80,7 @@ export default function SanBongPage() {
         className="flex gap-2 mb-4"
       >
         <input
-          className="border px-4 py-1 rounded w-full"
+          className="border px-4 py-1 rounded flex-1"
           placeholder="Nhập tên sân bóng để tìm kiếm..."
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
