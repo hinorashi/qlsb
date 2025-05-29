@@ -22,7 +22,7 @@ thuê sân và chi phí thuê sân giống như phiếu đặt sân. Có thể c
 sinh hoặc phải đổi lịch theo yêu cầu khách hàng. Ngoài ra, phần dưới hóa đơn ghi rõ
 đồ ăn uống phát sinh theo từng buổi, mỗi buổi được liệt kê thành một bảng, trong đó
 mỗi dòng của bảng mô tả một mặt hàng: mã, tên, giá, số lượng dùng, thành tiền. Tổng
-số tiền từng buổi và tổng số tiền cho cả đợt đặt sân.
+số tiền từng buổi và tổng số tiền cho cả đợt đặt sân.   
 • Quản lý sân (QL) phải nhập các mặt hàng (MH) bán kèm từ nhiều nhà cung cấp (mã,
 tên, địa chỉ, email, điện thoại, mô tả) khác nhau. Mỗi lần nhập hàng có hóa đơn nhập
 ghi rõ thông tin nhà cung cấp và danh sách các mặt hàng, mỗi dòng: id, tên, đơn giá,
