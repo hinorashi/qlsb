@@ -2,7 +2,7 @@ import axios from "axios";
 import { DoanhThu, HoaDon, SanBong } from "@/types/types";
 
 // Địa chỉ backend API thống kê doanh thu
-const BASE_URL = "http://localhost:5000/api/thong-ke";
+const THONG_KE_URL = "http://localhost:5000/api/thong-ke";
 const SAN_BONG_URL = "http://localhost:5000/api/san-bong";
 
 // Hàm lấy dữ liệu doanh thu tổng hợp theo chu kỳ và năm
@@ -10,7 +10,7 @@ export async function fetchRevenue(
   chuki: string,
   nam: string
 ): Promise<DoanhThu[]> {
-  const res = await axios.get(`${BASE_URL}?chuki=${chuki}&nam=${nam}`);
+  const res = await axios.get(`${THONG_KE_URL}?chuki=${chuki}&nam=${nam}`);
   return res.data;
 }
 
@@ -20,15 +20,15 @@ export async function fetchInvoiceDetails(
   thoigian: string
 ): Promise<HoaDon[]> {
   const res = await axios.get(
-    `${BASE_URL}/chi-tiet?chuki=${chuki}&thoigian=${thoigian}`
+    `${THONG_KE_URL}/chi-tiet?chuki=${chuki}&thoigian=${thoigian}`
   );
   return res.data;
 }
 
 // API sân bóng
-export async function fetchSanBong(keyword?: string): Promise<SanBong[]> {
+export async function fetchSanBong(tukhoa?: string): Promise<SanBong[]> {
   const res = await axios.get(
-    SAN_BONG_URL + (keyword ? `?keyword=${encodeURIComponent(keyword)}` : "")
+    SAN_BONG_URL + (tukhoa ? `?tukhoa=${encodeURIComponent(tukhoa)}` : "")
   );
   return res.data;
 }

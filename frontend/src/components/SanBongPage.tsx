@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchSanBong, createSanBong, updateSanBong, deleteSanBong } from "@/lib/api";
 import { SanBong } from "@/types/types";
 
@@ -9,13 +9,29 @@ export default function SanBongPage() {
   const [editing, setEditing] = useState<SanBong | null>(null);
   const [form, setForm] = useState<Omit<SanBong, "id">>({ ten_san: "", loai_san: "", mo_ta: "" });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   // Tìm kiếm sân bóng
   const handleSearch = async () => {
+    setError("");
+    // Nếu không nhập tukhoa, trả về toàn bộ danh sách
+    if (!keyword.trim()) {
+      const data = await fetchSanBong();
+      setList(data);
+      setEditing(null);
+      setMessage("");
+      return;
+    }
     const data = await fetchSanBong(keyword);
     setList(data);
     setEditing(null);
-    setMessage("");
+    if (data.length === 0) {
+      setError("Không tìm thấy sân bóng phù hợp.");
+      setMessage("");
+    } else {
+      setMessage("");
+      setError("");
+    }
   };
 
   // Chọn sửa sân bóng
@@ -50,6 +66,12 @@ export default function SanBongPage() {
     }
   };
 
+  // Tải danh sách sân bóng khi vào trang lần đầu
+  useEffect(() => {
+    handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Quản lý thông tin sân bóng</h1>
@@ -58,15 +80,16 @@ export default function SanBongPage() {
         className="flex gap-2 mb-4"
       >
         <input
-          className="border px-2 py-1 rounded w-full"
+          className="border px-4 py-1 rounded w-full"
           placeholder="Nhập tên sân bóng để tìm kiếm..."
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
         />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">Tìm kiếm</button>
+        <button type="submit" className="bg-blue-600 text-white px-12 py-1 rounded">Tìm kiếm</button>
       </form>
 
       {message && <div className="mb-2 text-green-600 font-semibold">{message}</div>}
+      {error && <div className="mb-2 text-red-600 font-semibold">{error}</div>}
 
       {/* Form thêm/sửa */}
       <form onSubmit={handleSubmit} className="mb-6 space-y-2 bg-gray-50 p-4 rounded shadow">
