@@ -1,5 +1,6 @@
-// Trang thống kê doanh thu
+// Trang chủ
 'use client';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { fetchRevenue, fetchInvoiceDetails } from '@/lib/api';
 import { DoanhThu, HoaDon } from '@/types/types';
@@ -34,17 +35,16 @@ export default function HomePage() {
   }, [selected]);
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold mb-4">📊 Thống kê doanh thu</h1>
-      {/* <ThemeToggle /> */}
-      {/* Thanh điều khiển chọn chu kỳ và năm */}
-      <FilterBar chuki={chuki} setChuki={setChuki} nam={nam} setNam={setNam} />
-      <BieuDoDoanhThu data={revenues} />
-      {/* <TrendLineChart data={revenues} /> */}
-      {/* Bảng doanh thu tổng hợp */}
-      <BangDoanhThu data={revenues} onSelect={setSelected} selected={selected} />
-      {/* Hiển thị chi tiết hóa đơn nếu đã chọn */}
-      {selected && <ChiTietHoaDon invoices={invoices} />}
+    <main className="flex flex-col items-center justify-center min-h-screen gap-8 p-8 bg-gray-50 dark:bg-gray-900">
+      <h1 className="text-3xl font-bold text-blue-700 dark:text-blue-300">Hệ thống quản lý cho thuê sân bóng mini</h1>
+      <div className="flex flex-col gap-4 w-full max-w-md">
+        <Link href="/thong-ke" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 border border-blue-200 text-lg font-semibold text-blue-700 dark:text-blue-200 text-center transition">
+          📊 Thống kê doanh thu
+        </Link>
+        <Link href="/san-bong" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900 border border-green-200 text-lg font-semibold text-green-700 dark:text-green-200 text-center transition">
+          ⚽ Quản lý thông tin sân bóng
+        </Link>
+      </div>
     </main>
   );
 }

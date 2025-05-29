@@ -10,3 +10,10 @@ export interface HoaDon {
   ngay_thanh_toan: string;
   tong_tien: number;
 }
+
+export interface SanBong {
+  id: number;
+  ten_san: string;
+  loai_san: string;
+  mo_ta: string;
+}

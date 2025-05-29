@@ -60,7 +60,6 @@ Các biểu đồ có thể triển khai:
 | 🍩 PieChart  | Tỉ lệ doanh thu từ các mặt hàng     |
 | 🧱 AreaChart | So sánh thuê sân vs. đồ ăn          |
 
-
 ## IV. Tích hợp API
 
 ## V. Chạy ứng dụng
