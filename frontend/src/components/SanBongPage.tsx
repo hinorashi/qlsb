@@ -73,7 +73,7 @@ export default function SanBongPage() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <>
       <h1 className="text-2xl font-bold mb-4">Quản lý thông tin sân bóng</h1>
       <form
         onSubmit={e => { e.preventDefault(); handleSearch(); }}
@@ -152,6 +152,6 @@ export default function SanBongPage() {
           ))}
         </tbody>
       </table>
-    </div>
+    </>
   );
 }
