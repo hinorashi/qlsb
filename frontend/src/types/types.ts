@@ -30,10 +30,13 @@ export interface ChiTietDatSan {
   id: number;
   phieu_dat_san_id: number;
   san_bong_id: number;
-  khung_gio: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
   ngay_bat_dau: string;
   ngay_ket_thuc: string;
   gia_thue_theo_gio: number;
+  gio_nhan_san?: string;
+  gio_tra_san?: string;
 }
 
 // Types for checkout module
@@ -48,6 +51,18 @@ export interface CheckoutHoaDon {
   id: number;
   ngay_thanh_toan: string;
   tong_tien: number;
+  // Thông tin chi tiết đặt sân
+  chi_tiet_dat_san_id?: number;
+  gio_bat_dau?: string;
+  gio_ket_thuc?: string;
+  gio_nhan_san?: string;
+  gio_tra_san?: string;
+  gia_thue_theo_gio?: number;
+  ngay_bat_dau?: string;
+  ngay_ket_thuc?: string;
+  so_gio_vuot?: number;
+  tien_phat?: number;
+  tong_tien_san?: number;
 }
 
 export interface CheckoutMatHang {

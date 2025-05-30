@@ -91,7 +91,8 @@ export async function createPhieuDatSan(data: {
 export async function createChiTietDatSan(data: {
   phieu_dat_san_id: number;
   san_bong_id: number;
-  khung_gio: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
   ngay_bat_dau: string;
   ngay_ket_thuc: string;
   gia_thue_theo_gio: number;
@@ -157,5 +158,10 @@ export async function deleteCheckoutMatHang(id: number) {
 
 export async function fetchCheckoutTongTienMatHang(hoaDonId: number) {
   const res = await axios.get(`${API_CHECKOUT_URL}/mat-hang/${hoaDonId}/tong-tien`);
+  return res.data;
+}
+
+export async function updateChiTietDatSan(id: number, data: { gio_nhan_san: string; gio_tra_san: string }) {
+  const res = await axios.put(`${API_BASE_URL}/dat-san/chi-tiet-dat-san/${id}`, data);
   return res.data;
 }

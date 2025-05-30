@@ -29,10 +29,13 @@ CREATE TABLE chi_tiet_dat_san (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     phieu_dat_san_id INTEGER NOT NULL,
     san_bong_id INTEGER NOT NULL,
-    khung_gio TEXT NOT NULL, -- eg: "17:00-19:00"
+    gio_bat_dau TEXT NOT NULL, -- giờ bắt đầu (HH:mm)
+    gio_ket_thuc TEXT NOT NULL, -- giờ kết thúc (HH:mm)
     ngay_bat_dau DATE NOT NULL,
     ngay_ket_thuc DATE NOT NULL,
     gia_thue_theo_gio REAL,
+    gio_nhan_san TEXT, -- giờ nhận sân thực tế (ISO string hoặc HH:mm)
+    gio_tra_san TEXT,  -- giờ trả sân thực tế (ISO string hoặc HH:mm)
     FOREIGN KEY (phieu_dat_san_id) REFERENCES phieu_dat_san(id),
     FOREIGN KEY (san_bong_id) REFERENCES san_bong(id)
 );

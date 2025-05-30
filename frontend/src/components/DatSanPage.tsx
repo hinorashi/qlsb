@@ -14,7 +14,8 @@ import type { SanBong, KhachHang } from "@/types/types";
 export default function DatSanPage() {
   // Bước 1: Tìm sân trống
   const [loaiSan, setLoaiSan] = useState('7');
-  const [khungGio, setKhungGio] = useState('18:00-20:00');
+  const [gioBatDau, setGioBatDau] = useState('18:00');
+  const [gioKetThuc, setGioKetThuc] = useState('20:00');
   const [ngayBatDau, setNgayBatDau] = useState('');
   const [ngayKetThuc, setNgayKetThuc] = useState('');
   const [sanTrong, setSanTrong] = useState<SanBong[]>([]);
@@ -41,13 +42,14 @@ export default function DatSanPage() {
 
   // Tìm sân trống
   const handleTimSan = async () => {
-    setKetQua(""); // Clear thông báo khi thao tác mới
+    setKetQua("");
     setSanChon(null);
     setSanTrong([]);
-    if (!loaiSan || !khungGio || !ngayBatDau || !ngayKetThuc) return;
+    if (!loaiSan || !gioBatDau || !gioKetThuc || !ngayBatDau || !ngayKetThuc) return;
     const data = await fetchSanTrong({
       loai_san: loaiSan,
-      khung_gio: khungGio,
+      gio_bat_dau: gioBatDau,
+      gio_ket_thuc: gioKetThuc,
       ngay_bat_dau: ngayBatDau,
       ngay_ket_thuc: ngayKetThuc,
     });
@@ -80,13 +82,11 @@ export default function DatSanPage() {
     setDsKhach(data);
   };
 
-  // Tính số giờ từ chuỗi khung giờ dạng "HH:mm-HH:mm"
-  function tinhSoGio(khungGio: string): number {
-    const match = khungGio.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/);
-    if (!match) return 0;
-    const start = parseInt(match[1], 10) + parseInt(match[2], 10) / 60;
-    const end = parseInt(match[3], 10) + parseInt(match[4], 10) / 60;
-    const diff = end - start;
+  // Tính số giờ từ giờ bắt đầu/kết thúc
+  function tinhSoGio(gioBatDau: string, gioKetThuc: string): number {
+    const [h1, m1] = gioBatDau.split(":").map(Number);
+    const [h2, m2] = gioKetThuc.split(":").map(Number);
+    const diff = (h2 + m2 / 60) - (h1 + m1 / 60);
     return diff > 0 ? diff : 0;
   }
 
@@ -99,32 +99,22 @@ export default function DatSanPage() {
     return diff > 0 ? diff : 0;
   }
 
-  // Khi chọn sân hoặc thay đổi khung giờ, tự động tính giá thuê 1 buổi và tổng tiền, đặt cọc
+  // Khi chọn sân hoặc thay đổi giờ/ngày, chỉ tính toán tổng tiền, đặt cọc, số buổi trên UI (KHÔNG gọi API tạo chi tiết đặt sân ở đây)
   React.useEffect(() => {
     setKetQua("");
     if (sanChon) {
-      const soGio = tinhSoGio(khungGio);
-      const gia = soGio > 0 ? Math.round(soGio * sanChon.gia_thue_theo_gio) : sanChon.gia_thue_theo_gio;
-      setGiaThue(gia);
-      // Nếu đã có ngày và giá thuê, tự động tính lại tổng tiền và đặt cọc
-      if (ngayBatDau && ngayKetThuc && typeof gia === "number") {
-        (async () => {
-          const res = await createChiTietDatSan({
-            phieu_dat_san_id: -1,
-            san_bong_id: sanChon.id,
-            khung_gio: khungGio,
-            ngay_bat_dau: ngayBatDau,
-            ngay_ket_thuc: ngayKetThuc,
-            gia_thue_theo_gio: gia,
-          });
-          setChiTietId(res.id);
-          const res2 = await tinhTienChiTietDatSan(res.id);
-          setTongTien(res2.tong_tien);
-          setTienCoc(Math.round(res2.tong_tien * 0.1));
-          // Nếu API trả về số buổi, lưu lại để hiển thị
-          if (typeof res2.so_ngay === "number") setSoBuoi(res2.so_ngay);
-          else setSoBuoi(tinhSoBuoi(ngayBatDau, ngayKetThuc));
-        })();
+      setGiaThue(null);
+      const soGio = tinhSoGio(gioBatDau, gioKetThuc);
+      // Giá thuê 1 buổi = số giờ * giá thuê theo giờ
+      const giaMotBuoi = soGio > 0 ? Math.round(soGio * sanChon.gia_thue_theo_gio) : sanChon.gia_thue_theo_gio;
+      setGiaThue(giaMotBuoi);
+      // Tổng tiền = số buổi * giá thuê 1 buổi
+      const soNgay = tinhSoBuoi(ngayBatDau, ngayKetThuc);
+      if (ngayBatDau && ngayKetThuc && typeof giaMotBuoi === "number" && soNgay > 0) {
+        const tong = giaMotBuoi * soNgay;
+        setTongTien(tong);
+        setTienCoc(Math.round(tong * 0.1));
+        setSoBuoi(soNgay);
       } else {
         setTongTien(null);
         setTienCoc(null);
@@ -136,12 +126,12 @@ export default function DatSanPage() {
       setTienCoc(null);
       setSoBuoi(null);
     }
-  }, [sanChon, khungGio, ngayBatDau, ngayKetThuc]);
+  }, [sanChon, gioBatDau, gioKetThuc, ngayBatDau, ngayKetThuc]);
 
   // Lưu phiếu đặt sân
   const handleDatSan = async () => {
     if (!khachChon || !sanChon || typeof tongTien !== "number" || typeof tienCoc !== "number") return;
-    setKetQua(""); // Clear thông báo trước khi đặt mới
+    setKetQua("");
     const res = await createPhieuDatSan({
       khach_hang_id: khachChon.id,
       tong_tien_du_kien: tongTien,
@@ -151,7 +141,8 @@ export default function DatSanPage() {
     await createChiTietDatSan({
       phieu_dat_san_id: res.id,
       san_bong_id: sanChon.id,
-      khung_gio: khungGio,
+      gio_bat_dau: gioBatDau,
+      gio_ket_thuc: gioKetThuc,
       ngay_bat_dau: ngayBatDau,
       ngay_ket_thuc: ngayKetThuc,
       gia_thue_theo_gio: typeof giaThue === "number" ? giaThue : 0,
@@ -172,7 +163,7 @@ export default function DatSanPage() {
   // Clear thông báo khi đổi thao tác
   React.useEffect(() => {
     setKetQua("");
-  }, [sanChon, khungGio, ngayBatDau, ngayKetThuc, tenKhach, khachChon]);
+  }, [sanChon, gioBatDau, gioKetThuc, ngayBatDau, ngayKetThuc, tenKhach, khachChon]);
 
   return (
     <div className="max-w-2xl mx-auto p-4 bg-white rounded shadow">
@@ -188,8 +179,12 @@ export default function DatSanPage() {
             </select>
           </div>
           <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Khung giờ</label>
-            <input type="text" value={khungGio} onChange={e => setKhungGio(e.target.value)} placeholder="vd: 18:00-20:00" className="border rounded px-2 py-1" />
+            <label className="text-xs font-medium mb-1">Giờ bắt đầu</label>
+            <input type="time" value={gioBatDau} onChange={e => setGioBatDau(e.target.value)} className="border rounded px-2 py-1" />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-xs font-medium mb-1">Giờ kết thúc</label>
+            <input type="time" value={gioKetThuc} onChange={e => setGioKetThuc(e.target.value)} className="border rounded px-2 py-1" />
           </div>
           <div className="flex flex-col">
             <label className="text-xs font-medium mb-1">Ngày bắt đầu</label>
