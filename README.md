@@ -422,6 +422,78 @@ WHERE id = :id;
 
 **⚠️ Lưu ý:** Nên kiểm tra xem sân có đang được sử dụng trong các phiếu đặt sân trước khi xoá.
 
+#### Đặt sân
+
+Các bảng chính liên quan: `khach_hang`, `san_bong`, `phieu_dat_san`, `chi_tiet_dat_san`.
+
+Đáp ứng các chức năng:
+- Lưu thông tin khách hàng (`khach_hang`).
+- Lưu thông tin sân bóng (`san_bong`).
+- Lưu phiếu đặt sân, liên kết khách hàng, ngày đặt, tổng tiền dự kiến, tiền cọc (`phieu_dat_san`).
+- Lưu chi tiết từng sân được đặt, khung giờ, ngày bắt đầu/kết thúc, giá thuê một buổi (`chi_tiet_dat_san`).
+
+**Tìm sân trống theo khung giờ, loại sân, ngày bắt đầu/kết thúc:**
+
+Tham số: loại sân, khung giờ, ngày bắt đầu, ngày kết thúc:
+```sql
+-- Tìm các sân còn trống theo loại sân, khung giờ, ngày bắt đầu/kết thúc
+SELECT s.*
+FROM san_bong s
+WHERE s.loai_san = ? -- loại sân cần tìm
+  AND s.id NOT IN (
+    SELECT ctds.san_bong_id
+    FROM chi_tiet_dat_san ctds
+    WHERE ctds.khung_gio = ? -- khung giờ cần tìm, ví dụ '18:00-20:00'
+      AND (
+        -- Kiểm tra giao thoa khoảng ngày
+        ctds.ngay_bat_dau <= ? -- ngày kết thúc cần đặt
+        AND ctds.ngay_ket_thuc >= ? -- ngày bắt đầu cần đặt
+      )
+  );
+```
+
+**Tìm khách hàng theo tên (tìm kiếm fuzzy):**
+
+```sql
+SELECT * FROM khach_hang
+WHERE ho_ten LIKE '%' || ? || '%';
+```
+
+**Thêm mới khách hàng:**
+
+```sql
+INSERT INTO khach_hang (ho_ten, sdt, email)
+VALUES (?, ?, ?);
+```
+
+**Lưu phiếu đặt sân (tạo phiếu đặt sân mới):**
+
+```sql
+INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc)
+VALUES (?, DATE('now'), ?, ?);
+```
+
+**Lưu chi tiết đặt sân (cho từng sân, từng khung giờ):**
+
+```sql
+INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi)
+VALUES (?, ?, ?, ?, ?, ?);
+```
+
+**Tính tổng số buổi và tổng tiền dự kiến:**
+
+- Số buổi = số ngày trong khoảng (ngay_bat_dau → ngay_ket_thuc) * số khung giờ (nếu đặt nhiều khung giờ).
+- Tổng tiền = số buổi * giá thuê một buổi.
+
+```sql
+SELECT 
+  julianday(ngay_ket_thuc) - julianday(ngay_bat_dau) + 1 AS so_ngay,
+  gia_thue_mot_buoi,
+  (julianday(ngay_ket_thuc) - julianday(ngay_bat_dau) + 1) * gia_thue_mot_buoi AS tong_tien
+FROM chi_tiet_dat_san
+WHERE id = ?;
+```
+
 ## IV. Thiết kế API
 
 ### 1. API thống kê doanh thu
