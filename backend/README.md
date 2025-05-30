@@ -125,7 +125,7 @@ curl -sX POST "http://localhost:5000/api/dat-san/phieu-dat-san" \
 ```sh
 curl -sX POST "http://localhost:5000/api/dat-san/chi-tiet-dat-san" \
   -H "Content-Type: application/json" \
-  -d '{"phieu_dat_san_id":1,"san_bong_id":2,"khung_gio":"18:00-20:00","ngay_bat_dau":"2025-06-01","ngay_ket_thuc":"2025-06-01","gia_thue_mot_buoi":250000}' | jq
+  -d '{"phieu_dat_san_id":1,"san_bong_id":2,"khung_gio":"18:00-20:00","ngay_bat_dau":"2025-06-01","ngay_ket_thuc":"2025-06-01","gia_thue_theo_gio":250000}' | jq
 ```
 
 #### Tính tổng số buổi và tổng tiền dự kiến cho 1 chi tiết đặt sân
@@ -159,7 +159,7 @@ Kết quả mẫu như sau:
     "khung_gio": "18:00-20:00",
     "ngay_bat_dau": "2025-01-05",
     "ngay_ket_thuc": "2025-01-20",
-    "gia_thue_mot_buoi": 100000
+    "gia_thue_theo_gio": 100000
   },
   {
     "id": 1,
@@ -177,7 +177,7 @@ Kết quả mẫu như sau:
     "khung_gio": "18:00-20:00",
     "ngay_bat_dau": "2025-06-01",
     "ngay_ket_thuc": "2025-06-01",
-    "gia_thue_mot_buoi": 250000
+    "gia_thue_theo_gio": 250000
   }
 ]
 ```

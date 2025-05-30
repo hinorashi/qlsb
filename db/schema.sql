@@ -13,7 +13,7 @@ CREATE TABLE san_bong (
     ten_san TEXT NOT NULL,
     loai_san TEXT CHECK(loai_san IN ('7','11')),
     mo_ta TEXT,
-    gia_thue_mot_buoi REAL
+    gia_thue_theo_gio REAL
 );
 
 CREATE TABLE phieu_dat_san (
@@ -32,7 +32,7 @@ CREATE TABLE chi_tiet_dat_san (
     khung_gio TEXT NOT NULL, -- eg: "17:00-19:00"
     ngay_bat_dau DATE NOT NULL,
     ngay_ket_thuc DATE NOT NULL,
-    gia_thue_mot_buoi REAL,
+    gia_thue_theo_gio REAL,
     FOREIGN KEY (phieu_dat_san_id) REFERENCES phieu_dat_san(id),
     FOREIGN KEY (san_bong_id) REFERENCES san_bong(id)
 );

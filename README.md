@@ -233,6 +233,7 @@ erDiagram
         STRING ten_san
         STRING loai_san
         STRING mo_ta
+        FLOAT gia_thue_theo_gio
     }
 
     phieu_dat_san {
@@ -250,7 +251,7 @@ erDiagram
         TIME khung_gio
         DATE ngay_bat_dau
         DATE ngay_ket_thuc
-        FLOAT gia_thue_mot_buoi
+        FLOAT gia_thue_theo_gio
     }
 
     hoa_don {
@@ -476,7 +477,7 @@ VALUES (?, DATE('now'), ?, ?);
 **Lưu chi tiết đặt sân (cho từng sân, từng khung giờ):**
 
 ```sql
-INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi)
+INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_theo_gio)
 VALUES (?, ?, ?, ?, ?, ?);
 ```
 
@@ -488,8 +489,8 @@ VALUES (?, ?, ?, ?, ?, ?);
 ```sql
 SELECT 
   julianday(ngay_ket_thuc) - julianday(ngay_bat_dau) + 1 AS so_ngay,
-  gia_thue_mot_buoi,
-  (julianday(ngay_ket_thuc) - julianday(ngay_bat_dau) + 1) * gia_thue_mot_buoi AS tong_tien
+  gia_thue_theo_gio,
+  (julianday(ngay_ket_thuc) - julianday(ngay_bat_dau) + 1) * gia_thue_theo_gio AS tong_tien
 FROM chi_tiet_dat_san
 WHERE id = ?;
 ```

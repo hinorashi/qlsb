@@ -49,6 +49,12 @@ export default function RootLayout({ children }) {
             >
               Đặt sân
             </Link>
+            <Link
+              href="/checkout"
+              className="text-blue-700 hover:underline"
+            >
+              Checkout
+            </Link>
           </nav>
         </header>
         <main className="max-w-4xl mx-auto px-4 pb-8">

@@ -22,7 +22,7 @@ VALUES
 ('Ngô Thị F', '0909666777', 'f@abc.com');
 
 -- SÂN
-INSERT INTO san_bong (ten_san, loai_san, mo_ta, gia_thue_mot_buoi)
+INSERT INTO san_bong (ten_san, loai_san, mo_ta, gia_thue_theo_gio)
 VALUES 
 ('Sân A1', '7', 'Sân 7 phía Tây', 120000),
 ('Sân A2', '7', 'Sân 7 phía Đông', 110000),
@@ -58,7 +58,7 @@ VALUES
 (5, '2023-03-01', 500000, 50000),
 (6, '2024-07-10', 700000, 70000);
 
-INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi)
+INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_theo_gio)
 VALUES 
 (1, 1, '18:00-20:00', '2025-01-05', '2025-01-20', 100000),
 (2, 2, '19:00-21:00', '2025-03-15', '2025-04-15', 150000),
@@ -119,7 +119,7 @@ INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_
 (6, '2025-02-12', 1100000, 110000),
 (1, '2025-11-18', 1200000, 120000);
 
-INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi) VALUES
+INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_theo_gio) VALUES
 (7, 1, '18:00-20:00', '2023-02-12', '2023-02-20', 40000),
 (8, 2, '19:00-21:00', '2023-08-16', '2023-08-25', 60000),
 (9, 1, '17:00-19:00', '2024-01-22', '2024-01-30', 90000),

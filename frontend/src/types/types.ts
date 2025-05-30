@@ -16,7 +16,7 @@ export interface SanBong {
   ten_san: string;
   loai_san: string;
   mo_ta: string;
-  gia_thue_mot_buoi: number;
+  gia_thue_theo_gio: number;
 }
 
 export interface KhachHang {
@@ -33,5 +33,36 @@ export interface ChiTietDatSan {
   khung_gio: string;
   ngay_bat_dau: string;
   ngay_ket_thuc: string;
-  gia_thue_mot_buoi: number;
+  gia_thue_theo_gio: number;
+}
+
+// Types for checkout module
+export interface CheckoutPhieuDatSan {
+  id: number;
+  ho_ten: string;
+  sdt: string;
+  ngay_dat: string;
+}
+
+export interface CheckoutHoaDon {
+  id: number;
+  ngay_thanh_toan: string;
+  tong_tien: number;
+}
+
+export interface CheckoutMatHang {
+  id: number;
+  ten_mat_hang: string;
+  don_vi: string;
+  ngay_su_dung: string;
+  so_luong: number;
+  gia_ban: number;
+  thanh_tien: number;
+}
+
+export interface MatHang {
+  id: number;
+  ten: string;
+  don_vi: string;
+  gia_ban: number;
 }

@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from 'react';
-import axios from 'axios';
 import {
   fetchSanTrong,
   fetchKhachHang,
@@ -36,6 +35,9 @@ export default function DatSanPage() {
   const [phieuId, setPhieuId] = useState(null);
   const [chiTietId, setChiTietId] = useState(null);
   const [ketQua, setKetQua] = useState('');
+
+  // Lưu số buổi đã tính được từ API (nếu có)
+  const [soBuoi, setSoBuoi] = useState<number | null>(null);
 
   // Tìm sân trống
   const handleTimSan = async () => {
@@ -78,32 +80,63 @@ export default function DatSanPage() {
     setDsKhach(data);
   };
 
-  // Khi chọn sân, tự động lấy giá thuê
+  // Tính số giờ từ chuỗi khung giờ dạng "HH:mm-HH:mm"
+  function tinhSoGio(khungGio: string): number {
+    const match = khungGio.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/);
+    if (!match) return 0;
+    const start = parseInt(match[1], 10) + parseInt(match[2], 10) / 60;
+    const end = parseInt(match[3], 10) + parseInt(match[4], 10) / 60;
+    const diff = end - start;
+    return diff > 0 ? diff : 0;
+  }
+
+  // Tính số buổi (số ngày)
+  function tinhSoBuoi(ngayBatDau: string, ngayKetThuc: string): number {
+    if (!ngayBatDau || !ngayKetThuc) return 0;
+    const d1 = new Date(ngayBatDau);
+    const d2 = new Date(ngayKetThuc);
+    const diff = Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return diff > 0 ? diff : 0;
+  }
+
+  // Khi chọn sân hoặc thay đổi khung giờ, tự động tính giá thuê 1 buổi và tổng tiền, đặt cọc
   React.useEffect(() => {
     setKetQua("");
     if (sanChon) {
-      setGiaThue(sanChon.gia_thue_mot_buoi);
+      const soGio = tinhSoGio(khungGio);
+      const gia = soGio > 0 ? Math.round(soGio * sanChon.gia_thue_theo_gio) : sanChon.gia_thue_theo_gio;
+      setGiaThue(gia);
+      // Nếu đã có ngày và giá thuê, tự động tính lại tổng tiền và đặt cọc
+      if (ngayBatDau && ngayKetThuc && typeof gia === "number") {
+        (async () => {
+          const res = await createChiTietDatSan({
+            phieu_dat_san_id: -1,
+            san_bong_id: sanChon.id,
+            khung_gio: khungGio,
+            ngay_bat_dau: ngayBatDau,
+            ngay_ket_thuc: ngayKetThuc,
+            gia_thue_theo_gio: gia,
+          });
+          setChiTietId(res.id);
+          const res2 = await tinhTienChiTietDatSan(res.id);
+          setTongTien(res2.tong_tien);
+          setTienCoc(Math.round(res2.tong_tien * 0.1));
+          // Nếu API trả về số buổi, lưu lại để hiển thị
+          if (typeof res2.so_ngay === "number") setSoBuoi(res2.so_ngay);
+          else setSoBuoi(tinhSoBuoi(ngayBatDau, ngayKetThuc));
+        })();
+      } else {
+        setTongTien(null);
+        setTienCoc(null);
+        setSoBuoi(null);
+      }
     } else {
       setGiaThue(null);
+      setTongTien(null);
+      setTienCoc(null);
+      setSoBuoi(null);
     }
-  }, [sanChon]);
-
-  // Tính tổng tiền
-  const handleTinhTien = async () => {
-    if (!ngayBatDau || !ngayKetThuc || !sanChon || typeof giaThue !== "number") return;
-    const res = await createChiTietDatSan({
-      phieu_dat_san_id: -1, // tạm thời, sẽ cập nhật sau
-      san_bong_id: sanChon.id,
-      khung_gio: khungGio,
-      ngay_bat_dau: ngayBatDau,
-      ngay_ket_thuc: ngayKetThuc,
-      gia_thue_mot_buoi: giaThue,
-    });
-    setChiTietId(res.id);
-    const res2 = await tinhTienChiTietDatSan(res.id);
-    setTongTien(res2.tong_tien);
-    setTienCoc(Math.round(res2.tong_tien * 0.1));
-  };
+  }, [sanChon, khungGio, ngayBatDau, ngayKetThuc]);
 
   // Lưu phiếu đặt sân
   const handleDatSan = async () => {
@@ -121,7 +154,7 @@ export default function DatSanPage() {
       khung_gio: khungGio,
       ngay_bat_dau: ngayBatDau,
       ngay_ket_thuc: ngayKetThuc,
-      gia_thue_mot_buoi: typeof giaThue === "number" ? giaThue : 0,
+      gia_thue_theo_gio: typeof giaThue === "number" ? giaThue : 0,
     });
     setKetQua("Đặt sân thành công!");
   };
@@ -169,7 +202,12 @@ export default function DatSanPage() {
             <ul className="flex gap-2">
               {sanTrong.map(san => (
                 <li key={san.id}>
-                  <button onClick={() => setSanChon(san)} className={`px-3 py-1 rounded border ${sanChon?.id === san.id ? 'bg-green-500 text-white' : ''}`}>{san.ten_san}</button>
+                  <button
+                    onClick={() => setSanChon(san)}
+                    className={`px-3 py-1 rounded border ${sanChon?.id === san.id ? 'bg-green-500 text-white' : ''}`}
+                  >
+                    {san.ten_san} ({san.gia_thue_theo_gio?.toLocaleString('vi-VN')}đ/giờ)
+                  </button>
                 </li>
               ))}
             </ul>
@@ -220,11 +258,11 @@ export default function DatSanPage() {
       {/* Bước 3: Nhập giá thuê, xác nhận đặt sân */}
       {sanChon && khachChon && (
         <div className="mb-4 border-b pb-4">
-          <div className="flex gap-2 mb-2 items-center">
+          <div className="flex flex-col gap-1 mb-2">
             <span>Giá thuê 1 buổi: <b>{giaThue?.toLocaleString()}đ</b></span>
-            <button onClick={handleTinhTien} className="bg-blue-500 text-white px-3 py-1 rounded">Tính tiền</button>
+            <span>Số buổi: <b>{soBuoi ?? tinhSoBuoi(ngayBatDau, ngayKetThuc)}</b></span>
             {typeof tongTien === "number" && typeof tienCoc === "number" && (
-              <span className="ml-2">Tổng tiền: <b>{tongTien.toLocaleString()}đ</b> | Đặt cọc: <b>{tienCoc.toLocaleString()}đ</b></span>
+              <span>Tổng tiền: <b>{tongTien.toLocaleString()}đ</b> | Đặt cọc: <b>{tienCoc.toLocaleString()}đ</b></span>
             )}
           </div>
           <button onClick={handleDatSan} className="bg-green-600 text-white px-4 py-2 rounded">Xác nhận đặt sân</button>

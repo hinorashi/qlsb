@@ -20,6 +20,9 @@ export default function HomePage() {
         <Link href="/dat-san" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-yellow-50 dark:hover:bg-yellow-900 border border-yellow-200 text-lg font-semibold text-yellow-700 dark:text-yellow-200 text-center transition">
           📝 Đặt sân
         </Link>
+        <Link href="/checkout" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-yellow-50 dark:hover:bg-yellow-900 border border-yellow-200 text-lg font-semibold text-yellow-700 dark:text-yellow-200 text-center transition">
+          🧾 Checkout buổi thuê & mặt hàng đã dùng
+        </Link>
       </div>
     </main>
   );

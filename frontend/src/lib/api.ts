@@ -94,7 +94,7 @@ export async function createChiTietDatSan(data: {
   khung_gio: string;
   ngay_bat_dau: string;
   ngay_ket_thuc: string;
-  gia_thue_mot_buoi: number;
+  gia_thue_theo_gio: number;
 }) {
   const res = await axios.post(`${API_BASE_URL}/dat-san/chi-tiet-dat-san`, data);
   return res.data;
@@ -109,5 +109,53 @@ export async function tinhTienChiTietDatSan(id: number) {
 
 export async function fetchPhieuDatSanDetail(id: number) {
   const res = await axios.get(`${API_BASE_URL}/dat-san/phieu-dat-san/${id}`);
+  return res.data;
+}
+
+// API checkout
+// TODO: Dùng url chung ở trên
+const API_CHECKOUT_URL = "http://localhost:5000/api/checkout";
+
+export async function fetchCheckoutPhieuDatSan(keyword?: string) {
+  const res = await axios.get(
+    `${API_CHECKOUT_URL}/phieu-dat-san${keyword ? `?tukhoa=${encodeURIComponent(keyword)}` : ""}`
+  );
+  return res.data;
+}
+
+export async function fetchCheckoutHoaDon(phieuDatSanId: number) {
+  const res = await axios.get(`${API_CHECKOUT_URL}/hoa-don/${phieuDatSanId}`);
+  return res.data;
+}
+
+export async function fetchCheckoutMatHang(hoaDonId: number) {
+  const res = await axios.get(`${API_CHECKOUT_URL}/mat-hang/${hoaDonId}`);
+  return res.data;
+}
+
+export async function fetchCheckoutTimMatHang(keyword: string) {
+  const res = await axios.get(`${API_CHECKOUT_URL}/tim-mat-hang?tukhoa=${encodeURIComponent(keyword)}`);
+  return res.data;
+}
+
+export async function createCheckoutMatHang(data: {
+  hoa_don_id: number;
+  ngay_su_dung: string;
+  mat_hang_id: number;
+  so_luong: number;
+  gia_ban: number;
+  thanh_tien: number;
+}) {
+  const res = await axios.post(`${API_CHECKOUT_URL}/mat-hang`, data);
+  return res.data;
+}
+
+export async function deleteCheckoutMatHang(id: number) {
+  const res = await axios.delete(`${API_CHECKOUT_URL}/mat-hang/${id}`);
+  return res.data;
+}
+
+export async function fetchCheckoutTongTienMatHang(hoaDonId: number) {
+  const res = await axios.get(`${API_CHECKOUT_URL}/mat-hang/${hoaDonId}/tong-tien`);
   return res.data;
 }
