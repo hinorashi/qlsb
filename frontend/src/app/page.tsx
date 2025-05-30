@@ -23,6 +23,9 @@ export default function HomePage() {
         <Link href="/checkout" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-yellow-50 dark:hover:bg-yellow-900 border border-yellow-200 text-lg font-semibold text-yellow-700 dark:text-yellow-200 text-center transition">
           🧾 Checkout buổi thuê & mặt hàng đã dùng
         </Link>
+        <Link href="/thanh-toan" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-900 border border-purple-200 text-lg font-semibold text-purple-700 dark:text-purple-200 text-center transition">
+          💵 Thanh toán hóa đơn
+        </Link>
       </div>
     </main>
   );

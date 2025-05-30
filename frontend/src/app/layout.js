@@ -55,6 +55,12 @@ export default function RootLayout({ children }) {
             >
               Checkout
             </Link>
+            <Link
+              href="/thanh-toan"
+              className="text-blue-700 hover:underline"
+            >
+              Thanh toán
+            </Link>
           </nav>
         </header>
         <main className="max-w-4xl mx-auto px-4 pb-8">

@@ -39,7 +39,7 @@ router.get("/hoa-don/:phieu_dat_san_id", async (req, res) => {
     const result = rows.map((row) => {
       let so_gio_vuot = 0;
       let tien_phat = 0;
-      let tong_tien_san = row.tong_tien; // luôn lấy từ hóa đơn gốc
+      let tong_tien_san = row.tien_thue_san || 0; // lấy đúng trường mới
       // Tính số giờ vượt và tiền phạt nếu có đủ thông tin
       if (row.gio_tra_san && row.gio_ket_thuc) {
         const [endHour, endMin] = row.gio_ket_thuc.split(":").map(Number);
@@ -51,9 +51,9 @@ router.get("/hoa-don/:phieu_dat_san_id", async (req, res) => {
           tien_phat = so_gio_vuot * (row.gia_thue_theo_gio || 0);
         }
       }
-      // Tổng tiền thuê sân thực tế = tổng tiền gốc + tiền phạt (nếu có)
+      // Tổng tiền thuê sân thực tế = tiền thuê sân + tiền phạt (nếu có)
       if (tien_phat > 0) {
-        tong_tien_san = (row.tong_tien || 0) + tien_phat;
+        tong_tien_san = (row.tien_thue_san || 0) + tien_phat;
       }
       return {
         ...row,
@@ -116,6 +116,7 @@ router.post("/mat-hang", (req, res) => {
     [hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
+      updateTongTienHoaDon(hoa_don_id);
       res.json({ id: this.lastID });
     }
   );
@@ -125,28 +126,61 @@ router.post("/mat-hang", (req, res) => {
 router.put("/mat-hang/:id", (req, res) => {
   const { id } = req.params;
   const { so_luong, gia_ban, thanh_tien } = req.body;
-  db.run(
-    "UPDATE chi_tiet_su_dung_mat_hang SET so_luong = ?, gia_ban = ?, thanh_tien = ? WHERE id = ?",
-    [so_luong, gia_ban, thanh_tien, id],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ changes: this.changes });
-    }
-  );
+  db.get("SELECT hoa_don_id FROM chi_tiet_su_dung_mat_hang WHERE id = ?", [id], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: "Không tìm thấy mặt hàng" });
+    db.run(
+      "UPDATE chi_tiet_su_dung_mat_hang SET so_luong = ?, gia_ban = ?, thanh_tien = ? WHERE id = ?",
+      [so_luong, gia_ban, thanh_tien, id],
+      function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        updateTongTienHoaDon(row.hoa_don_id);
+        res.json({ changes: this.changes });
+      }
+    );
+  });
 });
 
 // 7. Xóa mặt hàng đã dùng
 router.delete("/mat-hang/:id", (req, res) => {
   const { id } = req.params;
-  db.run(
-    "DELETE FROM chi_tiet_su_dung_mat_hang WHERE id = ?",
-    [id],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ changes: this.changes });
+  db.get("SELECT hoa_don_id FROM chi_tiet_su_dung_mat_hang WHERE id = ?", [id], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: "Không tìm thấy mặt hàng" });
+    db.run(
+      "DELETE FROM chi_tiet_su_dung_mat_hang WHERE id = ?",
+      [id],
+      function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        updateTongTienHoaDon(row.hoa_don_id);
+        res.json({ changes: this.changes });
+      }
+    );
+  });
+});
+
+// Sau khi thêm, sửa, xóa mặt hàng đã dùng, cập nhật lại tổng tiền mặt hàng vào hóa đơn
+function updateTongTienHoaDon(hoa_don_id) {
+  db.get(
+    "SELECT tien_thue_san FROM hoa_don WHERE id = ?",
+    [hoa_don_id],
+    (err, hoaDonRow) => {
+      if (err || !hoaDonRow) return;
+      const tienThueSan = hoaDonRow.tien_thue_san || 0;
+      db.get(
+        "SELECT SUM(thanh_tien) AS tong_tien_mat_hang FROM chi_tiet_su_dung_mat_hang WHERE hoa_don_id = ?",
+        [hoa_don_id],
+        (err2, row) => {
+          if (err2) return;
+          const tongTienMatHang = row && row.tong_tien_mat_hang ? row.tong_tien_mat_hang : 0;
+          const tongTien = tienThueSan + tongTienMatHang;
+          db.run(
+            "UPDATE hoa_don SET tong_tien = ? WHERE id = ?",
+            [tongTien, hoa_don_id]
+          );
+        }
+      );
     }
   );
-});
+}
 
 // 8. Tính tổng tiền mặt hàng đã dùng của một hóa đơn
 router.get("/mat-hang/:hoa_don_id/tong-tien", (req, res) => {
@@ -159,6 +193,29 @@ router.get("/mat-hang/:hoa_don_id/tong-tien", (req, res) => {
       res.json(row);
     }
   );
+});
+
+// 9. Thanh toán hóa đơn (cập nhật số tiền thực trả, số tiền còn lại)
+router.put("/hoa-don/:id/thanh-toan", (req, res) => {
+  const { id } = req.params;
+  const { so_tien_thuc_tra } = req.body;
+  if (typeof so_tien_thuc_tra !== "number" || so_tien_thuc_tra < 0) {
+    return res.status(400).json({ error: "Số tiền thực trả không hợp lệ" });
+  }
+  // Lấy tổng tiền hóa đơn
+  db.get("SELECT tong_tien FROM hoa_don WHERE id = ?", [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: "Không tìm thấy hóa đơn" });
+    const so_tien_con_lai = Math.max(0, row.tong_tien - so_tien_thuc_tra);
+    db.run(
+      "UPDATE hoa_don SET so_tien_thuc_tra = ?, so_tien_con_lai = ? WHERE id = ?",
+      [so_tien_thuc_tra, so_tien_con_lai, id],
+      function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        res.json({ id, so_tien_thuc_tra, so_tien_con_lai });
+      }
+    );
+  });
 });
 
 module.exports = router;

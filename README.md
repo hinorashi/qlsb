@@ -560,6 +560,69 @@ FROM chi_tiet_su_dung_mat_hang
 WHERE hoa_don_id = ?;
 ```
 
+#### Thanh toán
+
+```sql
+-- 1. Tìm khách hàng theo tên (autocomplete/fuzzy search)
+SELECT * FROM khach_hang
+WHERE ho_ten LIKE '%' || :keyword || '%';
+
+-- 2. Lấy danh sách phiếu đặt sân của khách hàng
+SELECT pds.*, kh.ho_ten, kh.sdt
+FROM phieu_dat_san pds
+JOIN khach_hang kh ON pds.khach_hang_id = kh.id
+WHERE kh.id = :khach_hang_id
+ORDER BY pds.ngay_dat DESC;
+
+-- 3. Lấy hóa đơn của một phiếu đặt sân
+SELECT hd.*, pds.ngay_dat, kh.ho_ten
+FROM hoa_don hd
+JOIN phieu_dat_san pds ON hd.phieu_dat_san_id = pds.id
+JOIN khach_hang kh ON pds.khach_hang_id = kh.id
+WHERE pds.id = :phieu_dat_san_id;
+
+-- 4. Lấy chi tiết mặt hàng đã dùng của hóa đơn
+SELECT ctsdmh.*, mh.ten AS ten_mat_hang, mh.don_vi
+FROM chi_tiet_su_dung_mat_hang ctsdmh
+JOIN mat_hang mh ON ctsdmh.mat_hang_id = mh.id
+WHERE ctsdmh.hoa_don_id = :hoa_don_id;
+
+-- 5. Cập nhật số tiền thực trả, số tiền còn lại của hóa đơn
+UPDATE hoa_don
+SET so_tien_thuc_tra = :so_tien_thuc_tra,
+    so_tien_con_lai = tong_tien - :so_tien_thuc_tra
+WHERE id = :hoa_don_id;
+
+-- 6. Sửa thông tin mặt hàng đã dùng (nếu có sai lệch)
+UPDATE chi_tiet_su_dung_mat_hang
+SET so_luong = :so_luong, gia_ban = :gia_ban, thanh_tien = :thanh_tien
+WHERE id = :chi_tiet_su_dung_mat_hang_id;
+
+-- 7. Xóa mặt hàng đã dùng (nếu cần)
+DELETE FROM chi_tiet_su_dung_mat_hang
+WHERE id = :chi_tiet_su_dung_mat_hang_id;
+
+-- 8. Thêm mặt hàng đã dùng mới (nếu bổ sung)
+INSERT INTO chi_tiet_su_dung_mat_hang (hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien)
+VALUES (:hoa_don_id, :ngay_su_dung, :mat_hang_id, :so_luong, :gia_ban, :thanh_tien);
+
+-- 9. Tính tổng tiền mặt hàng đã dùng của hóa đơn
+SELECT SUM(thanh_tien) AS tong_tien_mat_hang
+FROM chi_tiet_su_dung_mat_hang
+WHERE hoa_don_id = :hoa_don_id;
+
+-- 10. In hóa đơn: tổng hợp thông tin khách hàng, phiếu đặt sân, hóa đơn, mặt hàng đã dùng
+SELECT hd.*, pds.*, kh.*, ctds.*, sb.ten AS ten_san
+FROM hoa_don hd
+JOIN phieu_dat_san pds ON hd.phieu_dat_san_id = pds.id
+JOIN khach_hang kh ON pds.khach_hang_id = kh.id
+JOIN chi_tiet_dat_san ctds ON ctds.phieu_dat_san_id = pds.id
+JOIN san_bong sb ON ctds.san_bong_id = sb.id
+WHERE hd.id = :hoa_don_id;
+-- Lấy thêm mặt hàng đã dùng như truy vấn số 4
+-- (Gộp các truy vấn trên, hoặc join để lấy đầy đủ thông tin cho in hóa đơn)
+```
+
 ## IV. Thiết kế API
 
 ### 1. API thống kê doanh thu

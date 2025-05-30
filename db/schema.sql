@@ -45,6 +45,7 @@ CREATE TABLE hoa_don (
     phieu_dat_san_id INTEGER NOT NULL,
     ngay_thanh_toan DATE NOT NULL,
     tong_tien REAL,
+    tien_thue_san REAL, -- tổng tiền thuê sân (không gồm mặt hàng)
     so_tien_thuc_tra REAL,
     so_tien_con_lai REAL,
     FOREIGN KEY (phieu_dat_san_id) REFERENCES phieu_dat_san(id)

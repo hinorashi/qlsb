@@ -9,6 +9,7 @@ export interface HoaDon {
   ten_san: string;
   ngay_thanh_toan: string;
   tong_tien: number;
+  tien_thue_san: number; // thêm trường này
 }
 
 export interface SanBong {
@@ -51,6 +52,7 @@ export interface CheckoutHoaDon {
   id: number;
   ngay_thanh_toan: string;
   tong_tien: number;
+  tien_thue_san: number; // thêm trường này
   // Thông tin chi tiết đặt sân
   chi_tiet_dat_san_id?: number;
   gio_bat_dau?: string;

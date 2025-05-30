@@ -58,7 +58,8 @@ export async function deleteSanBong(id: number): Promise<{ changes: number }> {
 
 export async function fetchSanTrong(params: {
   loai_san: string;
-  khung_gio: string;
+  gio_bat_dau: string;
+  gio_ket_thuc: string;
   ngay_bat_dau: string;
   ngay_ket_thuc: string;
 }) {
@@ -114,28 +115,25 @@ export async function fetchPhieuDatSanDetail(id: number) {
 }
 
 // API checkout
-// TODO: Dùng url chung ở trên
-const API_CHECKOUT_URL = "http://localhost:5000/api/checkout";
-
 export async function fetchCheckoutPhieuDatSan(keyword?: string) {
   const res = await axios.get(
-    `${API_CHECKOUT_URL}/phieu-dat-san${keyword ? `?tukhoa=${encodeURIComponent(keyword)}` : ""}`
+    `${API_BASE_URL}/checkout/phieu-dat-san${keyword ? `?tukhoa=${encodeURIComponent(keyword)}` : ""}`
   );
   return res.data;
 }
 
 export async function fetchCheckoutHoaDon(phieuDatSanId: number) {
-  const res = await axios.get(`${API_CHECKOUT_URL}/hoa-don/${phieuDatSanId}`);
+  const res = await axios.get(`${API_BASE_URL}/checkout/hoa-don/${phieuDatSanId}`);
   return res.data;
 }
 
 export async function fetchCheckoutMatHang(hoaDonId: number) {
-  const res = await axios.get(`${API_CHECKOUT_URL}/mat-hang/${hoaDonId}`);
+  const res = await axios.get(`${API_BASE_URL}/checkout/mat-hang/${hoaDonId}`);
   return res.data;
 }
 
 export async function fetchCheckoutTimMatHang(keyword: string) {
-  const res = await axios.get(`${API_CHECKOUT_URL}/tim-mat-hang?tukhoa=${encodeURIComponent(keyword)}`);
+  const res = await axios.get(`${API_BASE_URL}/checkout/tim-mat-hang?tukhoa=${encodeURIComponent(keyword)}`);
   return res.data;
 }
 
@@ -147,21 +145,34 @@ export async function createCheckoutMatHang(data: {
   gia_ban: number;
   thanh_tien: number;
 }) {
-  const res = await axios.post(`${API_CHECKOUT_URL}/mat-hang`, data);
+  const res = await axios.post(`${API_BASE_URL}/checkout/mat-hang`, data);
   return res.data;
 }
 
 export async function deleteCheckoutMatHang(id: number) {
-  const res = await axios.delete(`${API_CHECKOUT_URL}/mat-hang/${id}`);
+  const res = await axios.delete(`${API_BASE_URL}/checkout/mat-hang/${id}`);
+  return res.data;
+}
+
+export async function updateCheckoutMatHang(id: number, data: { so_luong: number; gia_ban: number; thanh_tien: number }) {
+  const res = await axios.put(`${API_BASE_URL}/checkout/mat-hang/${id}`, data);
   return res.data;
 }
 
 export async function fetchCheckoutTongTienMatHang(hoaDonId: number) {
-  const res = await axios.get(`${API_CHECKOUT_URL}/mat-hang/${hoaDonId}/tong-tien`);
+  const res = await axios.get(`${API_BASE_URL}/checkout/mat-hang/${hoaDonId}/tong-tien`);
   return res.data;
 }
 
 export async function updateChiTietDatSan(id: number, data: { gio_nhan_san: string; gio_tra_san: string }) {
   const res = await axios.put(`${API_BASE_URL}/dat-san/chi-tiet-dat-san/${id}`, data);
+  return res.data;
+}
+
+export async function thanhToanHoaDon(id: number, so_tien_thuc_tra: number) {
+  const res = await axios.put(
+    `${API_BASE_URL}/checkout/hoa-don/${id}/thanh-toan`,
+    { so_tien_thuc_tra }
+  );
   return res.data;
 }
