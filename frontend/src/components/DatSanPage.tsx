@@ -169,6 +169,11 @@ export default function DatSanPage() {
     setNgayKetThuc(dateStr);
   }, []);
 
+  // Clear thông báo khi đổi thao tác
+  React.useEffect(() => {
+    setKetQua("");
+  }, [sanChon, khungGio, ngayBatDau, ngayKetThuc, tenKhach, khachChon]);
+
   return (
     <div className="max-w-2xl mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-xl font-bold mb-4">Tìm và đặt sân</h2>

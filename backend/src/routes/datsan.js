@@ -52,11 +52,20 @@ router.post('/phieu-dat-san', (req, res) => {
     return res.status(400).json({ error: 'Thiếu thông tin' });
   }
   db.run(
-    'INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc) VALUES (?, DATE(\'now\'), ?, ?)',
+    "INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc) VALUES (?, DATE('now'), ?, ?)",
     [khach_hang_id, tong_tien_du_kien, tien_dat_coc],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
+      const phieuDatSanId = this.lastID;
+      // Tạo hóa đơn ngay sau khi tạo phiếu đặt sân
+      db.run(
+        "INSERT INTO hoa_don (phieu_dat_san_id, ngay_thanh_toan, tong_tien, so_tien_thuc_tra, so_tien_con_lai) VALUES (?, DATE('now'), ?, 0, ?)",
+        [phieuDatSanId, tong_tien_du_kien, tong_tien_du_kien],
+        function (err2) {
+          if (err2) return res.status(500).json({ error: err2.message });
+          res.json({ id: phieuDatSanId });
+        }
+      );
     }
   );
 });

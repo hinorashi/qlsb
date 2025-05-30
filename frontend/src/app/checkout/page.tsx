@@ -138,9 +138,8 @@ export default function CheckoutPage() {
                 <li key={phieu.id}>
                   <button
                     onClick={() => handleChonPhieu(phieu)}
-                    className={`px-3 py-1 rounded border w-full text-left ${
-                      phieuChon?.id === phieu.id ? "bg-green-500 text-white" : ""
-                    }`}
+                    className={`px-3 py-1 rounded border w-full text-left ${phieuChon?.id === phieu.id ? "bg-green-500 text-white" : ""
+                      }`}
                   >
                     #{phieu.id} - {phieu.ho_ten} ({phieu.sdt}) - Ngày đặt: {phieu.ngay_dat}
                   </button>
@@ -159,12 +158,10 @@ export default function CheckoutPage() {
               <li key={hd.id}>
                 <button
                   onClick={() => handleChonHoaDon(hd)}
-                  className={`px-3 py-1 rounded border w-full text-left ${
-                    hoaDonChon?.id === hd.id ? "bg-blue-500 text-white" : ""
-                  }`}
+                  className={`px-3 py-1 rounded border w-full text-left ${hoaDonChon?.id === hd.id ? "bg-blue-500 text-white" : ""
+                    }`}
                 >
-                  #{hd.id} - Ngày thanh toán: {hd.ngay_thanh_toan} - Tổng tiền:
-                  {hd.tong_tien?.toLocaleString("vi-VN", {
+                  #{hd.id} - Ngày thanh toán: {hd.ngay_thanh_toan} - Tổng tiền: {hd.tong_tien?.toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   })}
@@ -271,9 +268,8 @@ export default function CheckoutPage() {
                       setMhForm((f) => ({ ...f, gia_ban: mh.gia_ban }));
                       setMessage("");
                     }}
-                    className={`px-3 py-1 rounded border w-full text-left ${
-                      mhChon?.id === mh.id ? "bg-green-500 text-white" : ""
-                    }`}
+                    className={`px-3 py-1 rounded border w-full text-left ${mhChon?.id === mh.id ? "bg-green-500 text-white" : ""
+                      }`}
                   >
                     {mh.ten} ({mh.don_vi}) - Giá:
                     {mh.gia_ban?.toLocaleString("vi-VN", {
