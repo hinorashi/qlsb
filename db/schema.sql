@@ -11,8 +11,9 @@ CREATE TABLE khach_hang (
 CREATE TABLE san_bong (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ten_san TEXT NOT NULL,
-    loai_san TEXT,
-    mo_ta TEXT
+    loai_san TEXT CHECK(loai_san IN ('7','11')),
+    mo_ta TEXT,
+    gia_thue_mot_buoi REAL
 );
 
 CREATE TABLE phieu_dat_san (

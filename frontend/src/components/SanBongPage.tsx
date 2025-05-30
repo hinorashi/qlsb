@@ -7,7 +7,7 @@ export default function SanBongPage() {
   const [keyword, setKeyword] = useState("");
   const [list, setList] = useState<SanBong[]>([]);
   const [editing, setEditing] = useState<SanBong | null>(null);
-  const [form, setForm] = useState<Omit<SanBong, "id">>({ ten_san: "", loai_san: "", mo_ta: "" });
+  const [form, setForm] = useState<Omit<SanBong, "id">>({ ten_san: "", loai_san: "", mo_ta: "", gia_thue_mot_buoi: 0 });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -37,7 +37,7 @@ export default function SanBongPage() {
   // Chọn sửa sân bóng
   const handleEdit = (sb: SanBong) => {
     setEditing(sb);
-    setForm({ ten_san: sb.ten_san, loai_san: sb.loai_san, mo_ta: sb.mo_ta || "" });
+    setForm({ ten_san: sb.ten_san, loai_san: sb.loai_san, mo_ta: sb.mo_ta || "", gia_thue_mot_buoi: typeof sb.gia_thue_mot_buoi === 'number' ? sb.gia_thue_mot_buoi : 0 });
     setMessage("");
   };
 
@@ -52,7 +52,7 @@ export default function SanBongPage() {
     } else {
       await createSanBong(form);
       setMessage("Thêm mới thành công!");
-      setForm({ ten_san: "", loai_san: "", mo_ta: "" });
+      setForm({ ten_san: "", loai_san: "", mo_ta: "", gia_thue_mot_buoi: 0 });
       handleSearch();
     }
   };
@@ -103,7 +103,7 @@ export default function SanBongPage() {
         />
         <input
           className="border px-2 py-1 rounded w-full"
-          placeholder="Loại sân (mini, 11 người, ...)"
+          placeholder="Loại sân (7, 11)"
           value={form.loai_san}
           onChange={e => setForm(f => ({ ...f, loai_san: e.target.value }))}
           required
@@ -114,12 +114,21 @@ export default function SanBongPage() {
           value={form.mo_ta}
           onChange={e => setForm(f => ({ ...f, mo_ta: e.target.value }))}
         />
+        <input
+          className="border px-2 py-1 rounded w-full"
+          placeholder="Giá thuê một buổi (VNĐ)"
+          type="number"
+          min={0}
+          value={form.gia_thue_mot_buoi ?? 0}
+          onChange={e => setForm(f => ({ ...f, gia_thue_mot_buoi: Number(e.target.value) }))}
+          required
+        />
         <div className="flex gap-2">
           <button type="submit" className="bg-green-600 text-white px-4 py-1 rounded">
             {editing ? "Cập nhật" : "Thêm mới"}
           </button>
           {editing && (
-            <button type="button" className="bg-gray-400 text-white px-4 py-1 rounded" onClick={() => { setEditing(null); setForm({ ten_san: "", loai_san: "", mo_ta: "" }); }}>
+            <button type="button" className="bg-gray-400 text-white px-4 py-1 rounded" onClick={() => { setEditing(null); setForm({ ten_san: "", loai_san: "", mo_ta: "", gia_thue_mot_buoi: 0 }); }}>
               Hủy
             </button>
           )}
@@ -134,6 +143,7 @@ export default function SanBongPage() {
             <th className="p-2">Tên sân</th>
             <th className="p-2">Loại sân</th>
             <th className="p-2">Mô tả</th>
+            <th className="p-2">Giá thuê/buổi</th>
             <th className="p-2">Thao tác</th>
           </tr>
         </thead>
@@ -144,6 +154,7 @@ export default function SanBongPage() {
               <td className="p-2">{sb.ten_san}</td>
               <td className="p-2">{sb.loai_san}</td>
               <td className="p-2">{sb.mo_ta}</td>
+              <td className="p-2">{typeof sb.gia_thue_mot_buoi === 'number' ? sb.gia_thue_mot_buoi.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : ''}</td>
               <td className="p-2 flex gap-2">
                 <button className="bg-yellow-400 px-2 py-1 rounded text-white" onClick={() => handleEdit(sb)}>Sửa</button>
                 <button className="bg-red-600 px-2 py-1 rounded text-white" onClick={() => handleDelete(sb.id)}>Xóa</button>

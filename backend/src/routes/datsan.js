@@ -28,63 +28,7 @@ router.get('/san-trong', (req, res) => {
   });
 });
 
-// 2. Tìm khách hàng theo tên (fuzzy)
-router.get('/khach-hang', (req, res) => {
-  const { tukhoa } = req.query;
-  if (!tukhoa) return res.status(400).json({ error: 'Thiếu từ khóa' });
-  db.all('SELECT * FROM khach_hang WHERE ho_ten LIKE ?', [`%${tukhoa}%`], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
-// 3. Thêm mới khách hàng
-router.post('/khach-hang', (req, res) => {
-  const { ho_ten, sdt, email } = req.body;
-  if (!ho_ten || !sdt) return res.status(400).json({ error: 'Thiếu thông tin' });
-  db.run(
-    'INSERT INTO khach_hang (ho_ten, sdt, email) VALUES (?, ?, ?)',
-    [ho_ten, sdt, email],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
-    }
-  );
-});
-
-// 4. Lưu phiếu đặt sân
-router.post('/phieu-dat-san', (req, res) => {
-  const { khach_hang_id, tong_tien_du_kien, tien_dat_coc } = req.body;
-  if (!khach_hang_id || tong_tien_du_kien == null || tien_dat_coc == null) {
-    return res.status(400).json({ error: 'Thiếu thông tin' });
-  }
-  db.run(
-    'INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc) VALUES (?, DATE(\'now\'), ?, ?)',
-    [khach_hang_id, tong_tien_du_kien, tien_dat_coc],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
-    }
-  );
-});
-
-// 5. Lưu chi tiết đặt sân
-router.post('/chi-tiet-dat-san', (req, res) => {
-  const { phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi } = req.body;
-  if (!phieu_dat_san_id || !san_bong_id || !khung_gio || !ngay_bat_dau || !ngay_ket_thuc || gia_thue_mot_buoi == null) {
-    return res.status(400).json({ error: 'Thiếu thông tin' });
-  }
-  db.run(
-    'INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi) VALUES (?, ?, ?, ?, ?, ?)',
-    [phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
-    }
-  );
-});
-
-// 6. Tính tổng số buổi và tổng tiền dự kiến cho 1 chi tiết đặt sân
+// 2. Tính tổng số buổi và tổng tiền dự kiến cho 1 chi tiết đặt sân
 router.get('/chi-tiet-dat-san/:id/tinh-tien', (req, res) => {
   const { id } = req.params;
   const sql = `
@@ -101,7 +45,51 @@ router.get('/chi-tiet-dat-san/:id/tinh-tien', (req, res) => {
   });
 });
 
-// 7. Lấy thông tin phiếu đặt sân (chi tiết)
+// 3. Lưu phiếu đặt sân
+router.post('/phieu-dat-san', (req, res) => {
+  const { khach_hang_id, tong_tien_du_kien, tien_dat_coc } = req.body;
+  if (!khach_hang_id || tong_tien_du_kien == null || tien_dat_coc == null) {
+    return res.status(400).json({ error: 'Thiếu thông tin' });
+  }
+  db.run(
+    'INSERT INTO phieu_dat_san (khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc) VALUES (?, DATE(\'now\'), ?, ?)',
+    [khach_hang_id, tong_tien_du_kien, tien_dat_coc],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID });
+    }
+  );
+});
+
+// 4. Lưu chi tiết đặt sân
+router.post('/chi-tiet-dat-san', (req, res) => {
+  let { phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi } = req.body;
+  if (!phieu_dat_san_id || !san_bong_id || !khung_gio || !ngay_bat_dau || !ngay_ket_thuc) {
+    return res.status(400).json({ error: 'Thiếu thông tin' });
+  }
+  // Nếu không có giá, lấy từ bảng san_bong
+  if (gia_thue_mot_buoi == null) {
+    db.get('SELECT gia_thue_mot_buoi FROM san_bong WHERE id = ?', [san_bong_id], (err, row) => {
+      if (err || !row) return res.status(500).json({ error: 'Không lấy được giá sân' });
+      gia_thue_mot_buoi = row.gia_thue_mot_buoi;
+      insertChiTiet();
+    });
+  } else {
+    insertChiTiet();
+  }
+  function insertChiTiet() {
+    db.run(
+      'INSERT INTO chi_tiet_dat_san (phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi) VALUES (?, ?, ?, ?, ?, ?)',
+      [phieu_dat_san_id, san_bong_id, khung_gio, ngay_bat_dau, ngay_ket_thuc, gia_thue_mot_buoi],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: this.lastID });
+      }
+    );
+  }
+});
+
+// 5. Lấy thông tin phiếu đặt sân (chi tiết)
 router.get('/phieu-dat-san/:id', (req, res) => {
   const { id } = req.params;
   const sql = `

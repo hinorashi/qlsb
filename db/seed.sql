@@ -22,10 +22,11 @@ VALUES
 ('Ngô Thị F', '0909666777', 'f@abc.com');
 
 -- SÂN
-INSERT INTO san_bong (ten_san, loai_san, mo_ta)
+INSERT INTO san_bong (ten_san, loai_san, mo_ta, gia_thue_mot_buoi)
 VALUES 
-('Sân A1', 'mini', 'Sân mini phía Tây'),
-('Sân A2', 'mini', 'Sân mini phía Đông');
+('Sân A1', '7', 'Sân 7 phía Tây', 120000),
+('Sân A2', '7', 'Sân 7 phía Đông', 110000),
+('Sân B1', '11', 'Sân 11 phía Nam', 200000);
 
 -- MẶT HÀNG
 INSERT INTO mat_hang (ten, don_vi, gia_ban)

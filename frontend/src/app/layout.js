@@ -43,6 +43,12 @@ export default function RootLayout({ children }) {
             >
               Quản lý sân bóng
             </Link>
+            <Link
+              href="/dat-san"
+              className="text-blue-700 hover:underline"
+            >
+              Đặt sân
+            </Link>
           </nav>
         </header>
         <main className="max-w-4xl mx-auto px-4 pb-8">

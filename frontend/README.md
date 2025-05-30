@@ -28,9 +28,19 @@ frontend/
 ├── tailwind.config.js          # Cấu hình Tailwind
 ```
 
-## III. Tạo trang thống kê
+## III. Tích hợp API
 
-### 1. So sánh Recharts và Chart.js
+_todo_
+
+## IV. Tính năng
+
+- Thống kê doanh thu theo tháng/quý/năm
+- Quản lý sân bóng (thêm, sửa, xóa)
+- Đặt sân (tìm sân trống, đặt sân)
+
+### 1. Thống kê
+
+#### So sánh Recharts và Chart.js
 
 So sánh hai thư viện mạnh mẽ: **Recharts** (chuyên React) và **Chart.js** (phổ thông):
 
@@ -44,8 +54,7 @@ So sánh hai thư viện mạnh mẽ: **Recharts** (chuyên React) và **Chart.j
 
 **Kết luận:** Chọn **Recharts** vì dễ tích hợp, dễ tùy biến, cú pháp JSX giống các component khác.
 
-
-### 2. Cài đặt
+#### Cài đặt
 
 ```sh
 npm install recharts
@@ -60,13 +69,23 @@ Các biểu đồ có thể triển khai:
 | 🍩 PieChart  | Tỉ lệ doanh thu từ các mặt hàng     |
 | 🧱 AreaChart | So sánh thuê sân vs. đồ ăn          |
 
-## IV. Tích hợp API
+### 2. Quản lý sân bóng
+
+_todo_
+
+### 3. Đặt sân
+
+Module **Đặt sân** gồm:
+- Trang `/dat-san` (Next.js route) sử dụng component `DatSanPage`.
+- Giao diện quy trình đặt sân: tìm sân trống, chọn khách hàng, nhập thời gian, nhập giá thuê, tính tiền, xác nhận đặt sân.
+- Đã thêm link menu **Đặt sân** vào layout để dễ truy cập.
 
 ## V. Chạy ứng dụng
 
 ```sh
 npm run dev
 ```
+
 ## VI. Truy cập ứng dụng
 
 Mở trình duyệt và truy cập vào địa chỉ: [http://localhost:3000](http://localhost:3000)

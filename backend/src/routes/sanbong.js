@@ -29,11 +29,11 @@ router.get('/:id', (req, res) => {
 
 // ➕ Thêm mới sân bóng
 router.post('/', (req, res) => {
-  const { ten_san, loai_san, mo_ta } = req.body;
-  if (!ten_san || !loai_san) return res.status(400).json({ error: 'Thiếu thông tin' });
+  const { ten_san, loai_san, mo_ta, gia_thue_mot_buoi } = req.body;
+  if (!ten_san || !loai_san || gia_thue_mot_buoi === undefined) return res.status(400).json({ error: 'Thiếu thông tin' });
   db.run(
-    'INSERT INTO san_bong (ten_san, loai_san, mo_ta) VALUES (?, ?, ?)',
-    [ten_san, loai_san, mo_ta],
+    'INSERT INTO san_bong (ten_san, loai_san, mo_ta, gia_thue_mot_buoi) VALUES (?, ?, ?, ?)',
+    [ten_san, loai_san, mo_ta, gia_thue_mot_buoi],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ id: this.lastID });
@@ -44,10 +44,11 @@ router.post('/', (req, res) => {
 // ✏️ Cập nhật thông tin sân bóng
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { ten_san, loai_san, mo_ta } = req.body;
+  const { ten_san, loai_san, mo_ta, gia_thue_mot_buoi } = req.body;
+  if (!ten_san || !loai_san || gia_thue_mot_buoi === undefined) return res.status(400).json({ error: 'Thiếu thông tin' });
   db.run(
-    'UPDATE san_bong SET ten_san = ?, loai_san = ?, mo_ta = ? WHERE id = ?',
-    [ten_san, loai_san, mo_ta, id],
+    'UPDATE san_bong SET ten_san = ?, loai_san = ?, mo_ta = ?, gia_thue_mot_buoi = ? WHERE id = ?',
+    [ten_san, loai_san, mo_ta, gia_thue_mot_buoi, id],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ changes: this.changes });
