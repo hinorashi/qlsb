@@ -196,3 +196,53 @@ curl -sX POST "http://localhost:5000/api/khach-hang" \
   -H "Content-Type: application/json" \
   -d '{"ho_ten":"Nguyen Van B","sdt":"0987654321","email":"b@example.com"}' | jq
 ```
+
+
+### 5. Checkout sân
+
+Tìm phiếu đặt sân theo tên khách hàng:
+```sh
+curl -s "http://localhost:5000/api/checkout/phieu-dat-san" | jq
+curl -s "http://localhost:5000/api/checkout/phieu-dat-san?tukhoa=Nguyen" | jq
+```
+
+Lấy danh sách hóa đơn (buổi thuê) của một phiếu đặt sân:
+```sh
+curl -s "http://localhost:5000/api/checkout/hoa-don/1" | jq
+curl -s "http://localhost:5000/api/checkout/hoa-don/10" | jq
+```
+
+Lấy danh sách mặt hàng đã dùng của một hóa đơn:
+```sh
+curl -s "http://localhost:5000/api/checkout/mat-hang/1" | jq
+```
+
+Tìm mặt hàng theo tên:
+```sh
+curl -s "http://localhost:5000/api/checkout/tim-mat-hang" | jq
+curl -s "http://localhost:5000/api/checkout/tim-mat-hang?tukhoa=Nước" | jq
+```
+
+Thêm mặt hàng đã dùng cho hóa đơn:
+```sh
+curl -sX POST "http://localhost:5000/api/checkout/mat-hang" \
+  -H "Content-Type: application/json" \
+  -d '{"hoa_don_id":1,"ngay_su_dung":"2025-06-01","mat_hang_id":2,"so_luong":3,"gia_ban":15000,"thanh_tien":45000}' | jq
+```
+
+Sửa mặt hàng đã dùng:
+```sh
+curl -sX PUT "http://localhost:5000/api/checkout/mat-hang/1" \
+  -H "Content-Type: application/json" \
+  -d '{"so_luong":5,"gia_ban":12000,"thanh_tien":60000}' | jq
+```
+
+Xóa mặt hàng đã dùng:
+```sh
+curl -sX DELETE "http://localhost:5000/api/checkout/mat-hang/1" | jq
+```
+
+Tính tổng tiền mặt hàng đã dùng của một hóa đơn:
+```sh
+curl -s "http://localhost:5000/api/checkout/mat-hang/1/tong-tien" | jq
+```

@@ -494,6 +494,71 @@ FROM chi_tiet_dat_san
 WHERE id = ?;
 ```
 
+#### Checkout sân
+
+**Lấy danh sách phiếu đặt sân của khách hàng (theo tên):**
+
+```sql
+SELECT pds.*, kh.ho_ten, kh.sdt
+FROM phieu_dat_san pds
+JOIN khach_hang kh ON pds.khach_hang_id = kh.id
+WHERE kh.ho_ten LIKE '%' || ? || '%';
+```
+
+**Lấy danh sách hóa đơn (buổi thuê) của một khách hàng:**
+
+```sql
+SELECT hd.*, pds.ngay_dat, kh.ho_ten
+FROM hoa_don hd
+JOIN phieu_dat_san pds ON hd.phieu_dat_san_id = pds.id
+JOIN khach_hang kh ON pds.khach_hang_id = kh.id
+WHERE kh.id = ?;
+```
+
+**Lấy danh sách mặt hàng đã dùng của một hóa đơn (buổi thuê):**
+
+```sql
+SELECT ctsdmh.*, mh.ten AS ten_mat_hang, mh.don_vi
+FROM chi_tiet_su_dung_mat_hang ctsdmh
+JOIN mat_hang mh ON ctsdmh.mat_hang_id = mh.id
+WHERE ctsdmh.hoa_don_id = ?;
+```
+
+**Tìm mặt hàng theo tên (autocomplete):**
+
+```sql
+SELECT * FROM mat_hang WHERE ten LIKE '%' || ? || '%';
+```
+
+**Thêm mặt hàng đã dùng cho một hóa đơn (buổi thuê):**
+
+```sql
+INSERT INTO chi_tiet_su_dung_mat_hang (hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien)
+VALUES (?, ?, ?, ?, ?, ?);
+```
+
+**Sửa thông tin mặt hàng đã dùng:**
+
+```sql
+UPDATE chi_tiet_su_dung_mat_hang
+SET so_luong = ?, gia_ban = ?, thanh_tien = ?
+WHERE id = ?;
+```
+
+**Xóa mặt hàng đã dùng:**
+
+```sql
+DELETE FROM chi_tiet_su_dung_mat_hang WHERE id = ?;
+```
+
+**Tính tổng tiền mặt hàng đã dùng của một hóa đơn (buổi thuê):**
+
+```sql
+SELECT SUM(thanh_tien) AS tong_tien
+FROM chi_tiet_su_dung_mat_hang
+WHERE hoa_don_id = ?;
+```
+
 ## IV. Thiết kế API
 
 ### 1. API thống kê doanh thu
