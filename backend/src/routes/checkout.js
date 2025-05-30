@@ -39,7 +39,7 @@ router.get("/hoa-don/:phieu_dat_san_id", async (req, res) => {
     const result = rows.map((row) => {
       let so_gio_vuot = 0;
       let tien_phat = 0;
-      let tong_tien_san = row.tong_tien;
+      let tong_tien_san = row.tong_tien; // luôn lấy từ hóa đơn gốc
       // Tính số giờ vượt và tiền phạt nếu có đủ thông tin
       if (row.gio_tra_san && row.gio_ket_thuc) {
         const [endHour, endMin] = row.gio_ket_thuc.split(":").map(Number);
@@ -51,15 +51,9 @@ router.get("/hoa-don/:phieu_dat_san_id", async (req, res) => {
           tien_phat = so_gio_vuot * (row.gia_thue_theo_gio || 0);
         }
       }
-      // Tính lại tổng tiền thuê sân thực tế (tổng tiền gốc + tiền phạt nếu có)
-      if (typeof row.gia_thue_theo_gio === 'number' && row.ngay_bat_dau && row.ngay_ket_thuc && row.gio_bat_dau && row.gio_ket_thuc) {
-        const so_ngay = Math.floor((new Date(row.ngay_ket_thuc) - new Date(row.ngay_bat_dau)) / (1000*60*60*24)) + 1;
-        const [h1, m1] = row.gio_bat_dau.split(":").map(Number);
-        const [h2, m2] = row.gio_ket_thuc.split(":").map(Number);
-        const so_gio = (h2 + m2 / 60) - (h1 + m1 / 60);
-        if (so_ngay > 0 && so_gio > 0) {
-          tong_tien_san = Math.round(so_ngay * so_gio * row.gia_thue_theo_gio + tien_phat);
-        }
+      // Tổng tiền thuê sân thực tế = tổng tiền gốc + tiền phạt (nếu có)
+      if (tien_phat > 0) {
+        tong_tien_san = (row.tong_tien || 0) + tien_phat;
       }
       return {
         ...row,

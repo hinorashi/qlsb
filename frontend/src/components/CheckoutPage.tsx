@@ -40,6 +40,7 @@ export default function CheckoutPage() {
   const [soGioVuot, setSoGioVuot] = useState(0);
   const [tongTienSan, setTongTienSan] = useState(0);
   const [chiTietDatSanId, setChiTietDatSanId] = useState<number | null>(null);
+  const [tongTienMatHang, setTongTienMatHang] = useState(0);
 
   // Tìm phiếu đặt sân
   const handleTimPhieu = async () => {
@@ -71,8 +72,9 @@ export default function CheckoutPage() {
     setMessage("");
     const res = await fetchCheckoutMatHang(hd.id);
     setMatHangList(res);
+    // Lấy tổng tiền mặt hàng đã dùng
     const tong = await fetchCheckoutTongTienMatHang(hd.id);
-    setTongTien(tong.tong_tien || 0);
+    setTongTienMatHang(tong.tong_tien || 0);
     setMhForm(f => ({ ...f, ngay_su_dung: todayStr }));
     // Khi chọn hóa đơn, nếu có gio_bat_dau/gio_ket_thuc thì fill mặc định cho giờ nhận/trả sân
     if (hd.chi_tiet_dat_san_id) {
@@ -116,10 +118,10 @@ export default function CheckoutPage() {
     setShowAddMH(false);
     setMhChon(null);
     setMhForm({ so_luong: 1, gia_ban: 0, ngay_su_dung: todayStr });
-    handleChonHoaDon(hoaDonChon);
+    // reload lại hóa đơn để cập nhật tổng tiền mặt hàng
+    if (hoaDonChon) handleChonHoaDon(hoaDonChon);
     setMessage("Đã thêm mặt hàng!");
   };
-
   // Xóa mặt hàng đã dùng
   const handleXoaMH = async (id: number) => {
     await deleteCheckoutMatHang(id);
@@ -129,18 +131,20 @@ export default function CheckoutPage() {
 
   // Hàm cập nhật giờ nhận/trả sân
   const handleCapNhatGio = async () => {
-    if (!chiTietDatSanId) return;
+    if (!chiTietDatSanId || !hoaDonChon) return;
     setMessage("");
     try {
-      const res = await updateChiTietDatSan(chiTietDatSanId, { gio_nhan_san: gioNhanSan, gio_tra_san: gioTraSan });
-      setSoGioVuot(res.so_gio_vuot || 0);
-      setTienPhat(res.tien_phat || 0);
-      setTongTienSan(res.tong_tien_san || 0);
+      await updateChiTietDatSan(chiTietDatSanId, { gio_nhan_san: gioNhanSan, gio_tra_san: gioTraSan });
+      // Sau khi cập nhật giờ, reload lại hóa đơn để lấy đúng tổng tiền thuê sân đã tính phạt
+      await handleChonHoaDon(hoaDonChon);
       setMessage("Đã cập nhật giờ nhận/trả sân!");
     } catch (e) {
       setMessage("Cập nhật thất bại!");
     }
   };
+
+  // Tính tổng tiền thanh toán cuối cùng
+  const tongTienThanhToan = tongTienSan + tongTienMatHang;
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white rounded shadow">
@@ -224,7 +228,7 @@ export default function CheckoutPage() {
             <span className="ml-auto font-semibold">
               Tổng tiền: {" "}
               <b>
-                {tongTien?.toLocaleString("vi-VN", {
+                {tongTienMatHang?.toLocaleString("vi-VN", {
                   style: "currency",
                   currency: "VND",
                 })}
@@ -398,7 +402,9 @@ export default function CheckoutPage() {
               <span className="text-xs">Tiền phạt: <b>{tienPhat.toLocaleString('vi-VN')}đ</b></span>
             </div>
           </div>
-          <div className="font-semibold mb-2">Tổng tiền thuê sân (đã tính phạt nếu có): <b>{tongTienSan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
+          <div className="font-semibold mb-2">Tiền thuê sân (đã tính phạt nếu có): <b>{tongTienSan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
+          <div className="font-semibold mb-2">Tiền mặt hàng đã dùng: <b>{tongTienMatHang.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
+          <div className="font-bold text-lg mb-2 text-blue-700">TỔNG TIỀN THANH TOÁN: <b>{tongTienThanhToan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
         </div>
       )}
       {message && (
