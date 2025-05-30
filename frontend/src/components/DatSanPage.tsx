@@ -39,6 +39,7 @@ export default function DatSanPage() {
 
   // Tìm sân trống
   const handleTimSan = async () => {
+    setKetQua(""); // Clear thông báo khi thao tác mới
     setSanChon(null);
     setSanTrong([]);
     if (!loaiSan || !khungGio || !ngayBatDau || !ngayKetThuc) return;
@@ -72,10 +73,14 @@ export default function DatSanPage() {
     const res = await createKhachHang(newKhach);
     setKhachChon({ id: res.id, ...newKhach });
     setShowThemKhach(false);
+    // Reload lại danh sách khách hàng để hiển thị khách mới
+    const data = await fetchKhachHang(tenKhach || undefined);
+    setDsKhach(data);
   };
 
   // Khi chọn sân, tự động lấy giá thuê
   React.useEffect(() => {
+    setKetQua("");
     if (sanChon) {
       setGiaThue(sanChon.gia_thue_mot_buoi);
     } else {
@@ -103,6 +108,7 @@ export default function DatSanPage() {
   // Lưu phiếu đặt sân
   const handleDatSan = async () => {
     if (!khachChon || !sanChon || typeof tongTien !== "number" || typeof tienCoc !== "number") return;
+    setKetQua(""); // Clear thông báo trước khi đặt mới
     const res = await createPhieuDatSan({
       khach_hang_id: khachChon.id,
       tong_tien_du_kien: tongTien,
@@ -132,18 +138,30 @@ export default function DatSanPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Đặt sân bóng</h2>
+      <h2 className="text-xl font-bold mb-4">Tìm và đặt sân</h2>
       {/* Bước 1: Tìm sân trống */}
       <div className="mb-4 border-b pb-4">
         <div className="flex flex-wrap gap-2 mb-2 items-center">
-          <select value={loaiSan} onChange={e => setLoaiSan(e.target.value)} className="border rounded px-2 py-1">
-            <option value="7">Sân 7</option>
-            <option value="11">Sân 11</option>
-          </select>
-          <input type="text" value={khungGio} onChange={e => setKhungGio(e.target.value)} placeholder="Khung giờ (vd: 18:00-20:00)" className="border rounded px-2 py-1" />
-          <input type="date" value={ngayBatDau} onChange={e => setNgayBatDau(e.target.value)} className="border rounded px-2 py-1" />
-          <input type="date" value={ngayKetThuc} onChange={e => setNgayKetThuc(e.target.value)} className="border rounded px-2 py-1" />
-          <button onClick={handleTimSan} className="bg-blue-500 text-white px-3 py-1 rounded whitespace-nowrap">Tìm sân</button>
+          <div className="flex flex-col">
+            <label className="text-xs font-medium mb-1">Loại sân</label>
+            <select value={loaiSan} onChange={e => setLoaiSan(e.target.value)} className="border rounded px-2 py-1">
+              <option value="7">Sân 7</option>
+              <option value="11">Sân 11</option>
+            </select>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-xs font-medium mb-1">Khung giờ</label>
+            <input type="text" value={khungGio} onChange={e => setKhungGio(e.target.value)} placeholder="vd: 18:00-20:00" className="border rounded px-2 py-1" />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-xs font-medium mb-1">Ngày bắt đầu</label>
+            <input type="date" value={ngayBatDau} onChange={e => setNgayBatDau(e.target.value)} className="border rounded px-2 py-1" />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-xs font-medium mb-1">Ngày kết thúc</label>
+            <input type="date" value={ngayKetThuc} onChange={e => setNgayKetThuc(e.target.value)} className="border rounded px-2 py-1" />
+          </div>
+          <button onClick={handleTimSan} className="bg-blue-500 text-white px-3 py-1 rounded whitespace-nowrap self-end">Tìm sân</button>
         </div>
         {sanTrong.length > 0 && (
           <div className="mt-2">
@@ -178,12 +196,23 @@ export default function DatSanPage() {
             </ul>
           )}
           {showThemKhach && (
-            <div className="mt-2 flex gap-2">
-              <input type="text" placeholder="Họ tên" value={newKhach.ho_ten} onChange={e => setNewKhach(k => ({ ...k, ho_ten: e.target.value }))} className="border rounded px-2 py-1" />
-              <input type="text" placeholder="SĐT" value={newKhach.sdt} onChange={e => setNewKhach(k => ({ ...k, sdt: e.target.value }))} className="border rounded px-2 py-1" />
-              <input type="email" placeholder="Email" value={newKhach.email} onChange={e => setNewKhach(k => ({ ...k, email: e.target.value }))} className="border rounded px-2 py-1" />
-              <button onClick={handleThemKhach} className="bg-green-500 text-white px-3 py-1 rounded">Lưu</button>
-              <button onClick={() => setShowThemKhach(false)} className="bg-gray-300 px-3 py-1 rounded">Hủy</button>
+            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 bg-gray-50 p-3 rounded shadow w-full">
+              <div className="flex flex-col">
+                <label className="text-xs font-medium mb-1">Họ tên</label>
+                <input type="text" placeholder="Họ tên" value={newKhach.ho_ten} onChange={e => setNewKhach(k => ({ ...k, ho_ten: e.target.value }))} className="border rounded px-2 py-1" />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-medium mb-1">SĐT</label>
+                <input type="text" placeholder="SĐT" value={newKhach.sdt} onChange={e => setNewKhach(k => ({ ...k, sdt: e.target.value }))} className="border rounded px-2 py-1" />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs font-medium mb-1">Email</label>
+                <input type="email" placeholder="Email" value={newKhach.email} onChange={e => setNewKhach(k => ({ ...k, email: e.target.value }))} className="border rounded px-2 py-1" />
+              </div>
+              <div className="flex gap-2 col-span-full mt-2">
+                <button onClick={handleThemKhach} className="bg-green-500 text-white px-3 py-1 rounded">Lưu</button>
+                <button onClick={() => setShowThemKhach(false)} className="bg-gray-300 px-3 py-1 rounded">Hủy</button>
+              </div>
             </div>
           )}
         </div>

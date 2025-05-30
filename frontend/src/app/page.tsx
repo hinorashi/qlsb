@@ -17,6 +17,9 @@ export default function HomePage() {
         <Link href="/san-bong" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900 border border-green-200 text-lg font-semibold text-green-700 dark:text-green-200 text-center transition">
           ⚽ Quản lý thông tin sân bóng
         </Link>
+        <Link href="/dat-san" className="block p-4 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-yellow-50 dark:hover:bg-yellow-900 border border-yellow-200 text-lg font-semibold text-yellow-700 dark:text-yellow-200 text-center transition">
+          📝 Đặt sân
+        </Link>
       </div>
     </main>
   );
