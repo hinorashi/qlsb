@@ -176,3 +176,23 @@ export async function thanhToanHoaDon(id: number, so_tien_thuc_tra: number) {
   );
   return res.data;
 }
+
+export async function createCheckoutMatHangAndUpdateTongTien(data: {
+  hoa_don_id: number;
+  ngay_su_dung: string;
+  mat_hang_id: number;
+  so_luong: number;
+  gia_ban: number;
+  thanh_tien: number;
+}) {
+  // Thêm mặt hàng
+  const res = await axios.post(`${API_BASE_URL}/checkout/mat-hang`, data);
+  // Gọi API cập nhật tổng tiền hóa đơn (backend đã tự động cập nhật, nhưng nếu muốn chắc chắn có thể fetch lại)
+  await axios.get(`${API_BASE_URL}/checkout/mat-hang/${data.hoa_don_id}/tong-tien`);
+  return res.data;
+}
+
+export async function updateTongTienHoaDon(id: number, tong_tien: number) {
+  const res = await axios.put(`${API_BASE_URL}/checkout/hoa-don/${id}/tong-tien`, { tong_tien });
+  return res.data;
+}

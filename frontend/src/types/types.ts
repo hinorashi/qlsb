@@ -52,7 +52,8 @@ export interface CheckoutHoaDon {
   id: number;
   ngay_thanh_toan: string;
   tong_tien: number;
-  tien_thue_san: number; // thêm trường này
+  tien_thue_san: number;
+  so_tien_thuc_tra: number;
   // Thông tin chi tiết đặt sân
   chi_tiet_dat_san_id?: number;
   gio_bat_dau?: string;

@@ -66,8 +66,8 @@ router.post('/phieu-dat-san', (req, res) => {
       const phieuDatSanId = this.lastID;
       // Tạo hóa đơn ngay sau khi tạo phiếu đặt sân
       db.run(
-        "INSERT INTO hoa_don (phieu_dat_san_id, ngay_thanh_toan, tong_tien, so_tien_thuc_tra, so_tien_con_lai) VALUES (?, DATE('now'), ?, 0, ?)",
-        [phieuDatSanId, tong_tien_du_kien, tong_tien_du_kien],
+        "INSERT INTO hoa_don (phieu_dat_san_id, ngay_thanh_toan, tong_tien, tien_thue_san, so_tien_thuc_tra, so_tien_con_lai) VALUES (?, DATE('now'), ?, ?, 0, ?)",
+        [phieuDatSanId, tong_tien_du_kien, tong_tien_du_kien, tong_tien_du_kien],
         function (err2) {
           if (err2) return res.status(500).json({ error: err2.message });
           res.json({ id: phieuDatSanId });

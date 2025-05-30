@@ -7,6 +7,7 @@ import {
   updateCheckoutMatHang,
   deleteCheckoutMatHang,
   thanhToanHoaDon,
+  createCheckoutMatHangAndUpdateTongTien,
 } from "@/lib/api";
 import type { CheckoutPhieuDatSan, CheckoutHoaDon, CheckoutMatHang } from "@/types/types";
 
@@ -17,8 +18,8 @@ export default function ThanhToanPage() {
   const [hoaDonList, setHoaDonList] = useState<CheckoutHoaDon[]>([]);
   const [hoaDonChon, setHoaDonChon] = useState<CheckoutHoaDon | null>(null);
   const [matHangList, setMatHangList] = useState<CheckoutMatHang[]>([]);
-  const [showEditMH, setShowEditMH] = useState<number|null>(null);
-  const [editMH, setEditMH] = useState<{so_luong:number;gia_ban:number}|null>(null);
+  const [showEditMH, setShowEditMH] = useState<number | null>(null);
+  const [editMH, setEditMH] = useState<{ so_luong: number; gia_ban: number } | null>(null);
   const [soTienTra, setSoTienTra] = useState(0);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,10 +46,14 @@ export default function ThanhToanPage() {
   // Khi chọn hóa đơn, lấy danh sách mặt hàng đã dùng
   const handleChonHoaDonFull = async (hd: CheckoutHoaDon) => {
     setHoaDonChon(hd);
-    setSoTienTra(hd.tong_tien || 0);
     setMessage("");
     const res = await fetchCheckoutMatHang(hd.id);
     setMatHangList(res);
+    // Auto fill số tiền trả lần này bằng số tiền còn nợ
+    const tongTienMatHang = res.reduce((sum: number, mh: CheckoutMatHang) => sum + mh.so_luong * mh.gia_ban, 0);
+    const tongTienPhaiTra = (hd.tien_thue_san || 0) + tongTienMatHang;
+    const soTienDaTra = hd.so_tien_thuc_tra || 0;
+    setSoTienTra(tongTienPhaiTra - soTienDaTra > 0 ? tongTienPhaiTra - soTienDaTra : 0);
   };
 
   // Chọn hóa đơn
@@ -64,7 +69,18 @@ export default function ThanhToanPage() {
     setLoading(true);
     setMessage("");
     try {
-      await thanhToanHoaDon(hoaDonChon.id, soTienTra);
+      // Số tiền thực trả mới = số tiền đã trả trước đó + số tiền trả lần này
+      const soTienThucTraMoi = (hoaDonChon.so_tien_thuc_tra || 0) + soTienTra;
+      await thanhToanHoaDon(hoaDonChon.id, soTienThucTraMoi);
+      // Sau khi thanh toán, reload lại hóa đơn và mặt hàng để cập nhật số tiền thực trả, tổng tiền, v.v.
+      const [hoaDonListRes, matHangListRes] = await Promise.all([
+        fetchCheckoutHoaDon(phieuChon!.id),
+        fetchCheckoutMatHang(hoaDonChon.id)
+      ]);
+      setHoaDonList(hoaDonListRes);
+      const updatedHoaDon = hoaDonListRes.find((hd: CheckoutHoaDon) => hd.id === hoaDonChon.id) || hoaDonChon;
+      setHoaDonChon(updatedHoaDon);
+      setMatHangList(matHangListRes);
       setMessage("Thanh toán thành công!");
     } catch (e) {
       setMessage("Thanh toán thất bại!");
@@ -96,12 +112,37 @@ export default function ThanhToanPage() {
     setMatHangList(res);
   };
 
+  // Thêm mặt hàng đã dùng
+  const handleAddMatHang = async (data: {
+    hoa_don_id: number;
+    ngay_su_dung: string;
+    mat_hang_id: number;
+    so_luong: number;
+    gia_ban: number;
+    thanh_tien: number;
+  }) => {
+    await createCheckoutMatHangAndUpdateTongTien(data);
+    const res = await fetchCheckoutMatHang(data.hoa_don_id);
+    setMatHangList(res);
+  };
+
   // Tính tổng tiền mặt hàng đã dùng
   const tongTienMatHang = matHangList.reduce((sum, mh) => sum + mh.so_luong * mh.gia_ban, 0);
   // Tính tổng tiền phải trả (tiền thuê sân + mặt hàng)
   const tongTienPhaiTra = (hoaDonChon?.tien_thue_san || 0) + tongTienMatHang;
-  // Số tiền còn nợ hoặc dư
-  const soTienConLai = soTienTra - tongTienPhaiTra;
+  // Số tiền đã trả thực tế (ưu tiên lấy từ DB nếu đã thanh toán)
+  const soTienDaTra = hoaDonChon?.so_tien_thuc_tra != null ? hoaDonChon.so_tien_thuc_tra : 0;
+  // Số tiền còn nợ
+  const soTienConNo = tongTienPhaiTra - soTienDaTra;
+  // Số tiền còn lại/dư sau lần trả này
+  const soTienSauLanTra = soTienDaTra + soTienTra - tongTienPhaiTra;
+
+  // Khi số tiền còn nợ = 0, tự động clear số tiền khách trả lần này
+  React.useEffect(() => {
+    if (soTienConNo === 0 && soTienTra !== 0) {
+      setSoTienTra(0);
+    }
+  }, [soTienConNo, soTienTra]);
 
   return (
     <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
@@ -185,25 +226,25 @@ export default function ThanhToanPage() {
                   <td className="p-2">{mh.ngay_su_dung}</td>
                   <td className="p-2">
                     {showEditMH === mh.id ? (
-                      <input type="number" min={1} value={editMH?.so_luong} onChange={e=>setEditMH(editMH?{...editMH,so_luong:Number(e.target.value)}:null)} className="border px-1 w-16" />
+                      <input type="number" min={1} value={editMH?.so_luong} onChange={e => setEditMH(editMH ? { ...editMH, so_luong: Number(e.target.value) } : null)} className="border px-1 w-16" />
                     ) : mh.so_luong}
                   </td>
                   <td className="p-2">
                     {showEditMH === mh.id ? (
-                      <input type="number" min={0} value={editMH?.gia_ban} onChange={e=>setEditMH(editMH?{...editMH,gia_ban:Number(e.target.value)}:null)} className="border px-1 w-20" />
+                      <input type="number" min={0} value={editMH?.gia_ban} onChange={e => setEditMH(editMH ? { ...editMH, gia_ban: Number(e.target.value) } : null)} className="border px-1 w-20" />
                     ) : mh.gia_ban.toLocaleString("vi-VN")}
                   </td>
-                  <td className="p-2">{(mh.so_luong*mh.gia_ban).toLocaleString("vi-VN")}</td>
+                  <td className="p-2">{(mh.so_luong * mh.gia_ban).toLocaleString("vi-VN")}</td>
                   <td className="p-2">
                     {showEditMH === mh.id ? (
                       <>
-                        <button onClick={()=>handleSaveEditMH(mh)} className="text-green-600 mr-2">Lưu</button>
-                        <button onClick={()=>{setShowEditMH(null);setEditMH(null);}} className="text-gray-600">Hủy</button>
+                        <button onClick={() => handleSaveEditMH(mh)} className="text-green-600 mr-2">Lưu</button>
+                        <button onClick={() => { setShowEditMH(null); setEditMH(null); }} className="text-gray-600">Hủy</button>
                       </>
                     ) : (
                       <>
-                        <button onClick={()=>handleEditMH(mh)} className="text-blue-600 mr-2">Sửa</button>
-                        <button onClick={()=>handleDeleteMH(mh.id)} className="text-red-600">Xóa</button>
+                        <button onClick={() => handleEditMH(mh)} className="text-blue-600 mr-2">Sửa</button>
+                        <button onClick={() => handleDeleteMH(mh.id)} className="text-red-600">Xóa</button>
                       </>
                     )}
                   </td>
@@ -216,21 +257,31 @@ export default function ThanhToanPage() {
       {/* Form thanh toán */}
       {hoaDonChon && (
         <div className="mb-2">
-          <div className="font-semibold mb-1">Nhập số tiền khách trả:</div>
+          <div className="mb-2 text-sm">
+            <span>Tiền thuê sân: <b>{(hoaDonChon.tien_thue_san || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
+            <span>Tổng tiền mặt hàng: <b>{tongTienMatHang.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
+            <span>Tổng tiền phải trả: <b>{tongTienPhaiTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
+            <span>Số tiền đã trả: <b>{soTienDaTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
+            <span>Số tiền còn nợ: <b>{soTienConNo > 0 ? soTienConNo.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) : "0 đ"}</b></span><br />
+          </div>
+          <div className="font-semibold mb-1">Nhập số tiền khách trả (lần này):</div>
           <input
             type="number"
             min={0}
-            max={tongTienPhaiTra}
+            max={soTienConNo}
             className="border px-2 py-1 rounded w-full mb-2"
             value={soTienTra}
             onChange={e => setSoTienTra(Number(e.target.value))}
           />
           <div className="mb-2 text-sm">
-            <span>Tiền thuê sân: <b>{(hoaDonChon.tien_thue_san || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br/>
-            <span>Tổng tiền mặt hàng: <b>{tongTienMatHang.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br/>
-            <span>Tổng tiền phải trả: <b>{tongTienPhaiTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br/>
-            <span>Số tiền khách trả: <b>{soTienTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br/>
-            <span>{soTienConLai < 0 ? `Khách còn nợ: ${(Math.abs(soTienConLai)).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}` : soTienConLai > 0 ? `Khách dư: ${soTienConLai.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}` : "Đã thanh toán đủ"}</span>
+            <span>Dự đoán:</span><br />
+            <span>
+              {soTienSauLanTra > 1000
+                ? `Khách sẽ trả dư: ${soTienSauLanTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}`
+                : soTienSauLanTra < -1000
+                  ? `Khách sẽ còn nợ: ${(Math.abs(soTienSauLanTra)).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}`
+                  : "Thanh toán đủ"}
+            </span>
           </div>
           <button
             onClick={handleThanhToan}

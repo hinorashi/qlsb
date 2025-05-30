@@ -218,4 +218,21 @@ router.put("/hoa-don/:id/thanh-toan", (req, res) => {
   });
 });
 
+// API cập nhật tổng tiền hóa đơn thủ công
+router.put("/hoa-don/:id/tong-tien", (req, res) => {
+  const { id } = req.params;
+  const { tong_tien } = req.body;
+  if (typeof tong_tien !== "number" || tong_tien < 0) {
+    return res.status(400).json({ error: "Tổng tiền không hợp lệ" });
+  }
+  db.run(
+    "UPDATE hoa_don SET tong_tien = ? WHERE id = ?",
+    [tong_tien, id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id, tong_tien });
+    }
+  );
+});
+
 module.exports = router;

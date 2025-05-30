@@ -9,6 +9,7 @@ import {
   deleteCheckoutMatHang,
   fetchCheckoutTongTienMatHang,
   updateChiTietDatSan,
+  updateTongTienHoaDon, // thêm hàm mới
 } from "@/lib/api";
 import type { CheckoutPhieuDatSan, CheckoutHoaDon, CheckoutMatHang, MatHang } from "@/types/types";
 
@@ -115,17 +116,22 @@ export default function CheckoutPage() {
       gia_ban: mhForm.gia_ban,
       thanh_tien,
     });
+    // Cập nhật tổng tiền hóa đơn vào DB sau khi thêm mặt hàng
+    await updateTongTienHoaDon(hoaDonChon.id, tongTienSan + tongTienMatHang + thanh_tien);
     setShowAddMH(false);
     setMhChon(null);
     setMhForm({ so_luong: 1, gia_ban: 0, ngay_su_dung: todayStr });
-    // reload lại hóa đơn để cập nhật tổng tiền mặt hàng
     if (hoaDonChon) handleChonHoaDon(hoaDonChon);
     setMessage("Đã thêm mặt hàng!");
   };
   // Xóa mặt hàng đã dùng
   const handleXoaMH = async (id: number) => {
     await deleteCheckoutMatHang(id);
-    if (hoaDonChon) handleChonHoaDon(hoaDonChon);
+    // Cập nhật tổng tiền hóa đơn vào DB sau khi xóa mặt hàng
+    if (hoaDonChon) {
+      await updateTongTienHoaDon(hoaDonChon.id, tongTienSan + tongTienMatHang);
+      handleChonHoaDon(hoaDonChon);
+    }
     setMessage("Đã xóa mặt hàng!");
   };
 
@@ -136,6 +142,7 @@ export default function CheckoutPage() {
     try {
       await updateChiTietDatSan(chiTietDatSanId, { gio_nhan_san: gioNhanSan, gio_tra_san: gioTraSan });
       // Sau khi cập nhật giờ, reload lại hóa đơn để lấy đúng tổng tiền thuê sân đã tính phạt
+      await updateTongTienHoaDon(hoaDonChon.id, tongTienSan + tongTienMatHang);
       await handleChonHoaDon(hoaDonChon);
       setMessage("Đã cập nhật giờ nhận/trả sân!");
     } catch (e) {
@@ -387,8 +394,9 @@ export default function CheckoutPage() {
             </div>
           )}
           {/* Bổ sung form nhập giờ nhận/trả sân */}
-          <div className="flex flex-col md:flex-row gap-4 items-end mb-2 bg-gray-50 p-3 rounded shadow">
+          {/* <div className="flex flex-col md:flex-row gap-4 items-end mb-2 bg-gray-50 p-3 rounded shadow">
             <div className="flex flex-col">
+              Chức năng này tạm bỏ, chưa hoàn thiện
               <label className="text-xs font-medium mb-1">Giờ nhận sân</label>
               <input type="time" value={gioNhanSan} onChange={e => setGioNhanSan(e.target.value)} className="border rounded px-2 py-1" />
             </div>
@@ -401,8 +409,8 @@ export default function CheckoutPage() {
               <span className="text-xs">Số giờ vượt: <b>{soGioVuot}</b></span>
               <span className="text-xs">Tiền phạt: <b>{tienPhat.toLocaleString('vi-VN')}đ</b></span>
             </div>
-          </div>
-          <div className="font-semibold mb-2">Tiền thuê sân (đã tính phạt nếu có): <b>{tongTienSan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
+          </div> */}
+          <div className="font-semibold mb-2">Tiền thuê sân: <b>{tongTienSan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
           <div className="font-semibold mb-2">Tiền mặt hàng đã dùng: <b>{tongTienMatHang.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
           <div className="font-bold text-lg mb-2 text-blue-700">TỔNG TIỀN THANH TOÁN: <b>{tongTienThanhToan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
         </div>
