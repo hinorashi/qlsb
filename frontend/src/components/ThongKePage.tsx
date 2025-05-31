@@ -5,9 +5,7 @@ import { DoanhThu, HoaDon } from "@/types/types";
 import FilterBar from "@/components/FilterBar";
 import BangDoanhThu from "@/components/BangDoanhThu";
 import ChiTietHoaDon from "@/components/ChiTietHoaDon";
-// import ItemPieChart from '@/components/ItemPieChart';
-// import ThemeToggle from '@/components/_ThemeToggle';
-// import TrendLineChart from '@/components/_TrendLineChart';
+import BieuDoDoanhThu from "@/components/BieuDoDoanhThu";
 
 export default function ThongKePage() {
   // State cho chu kỳ, năm, dữ liệu doanh thu, mục đã chọn và chi tiết hóa đơn
@@ -32,11 +30,16 @@ export default function ThongKePage() {
   }, [selected, chuki]);
 
   return (
-    <>
+    <div className="max-w-full p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">Thống kê doanh thu</h1>
       <FilterBar chuki={chuki} setChuki={setChuki} nam={nam} setNam={setNam} />
+      {/* Biểu đồ doanh thu */}
+      <BieuDoDoanhThu data={revenues} />
+      {/* <TrendLineChart data={revenues} /> */}
+      {/* Bảng doanh thu tổng hợp */}
       <BangDoanhThu data={revenues} onSelect={setSelected} selected={selected} />
+      {/* Hiển thị chi tiết hóa đơn nếu đã chọn */}
       {selected && <ChiTietHoaDon invoices={invoices} />}
-    </>
+    </div>
   );
 }

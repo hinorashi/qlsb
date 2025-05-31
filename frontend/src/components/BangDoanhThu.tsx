@@ -12,7 +12,7 @@ interface Props {
 // Bảng hiển thị doanh thu tổng hợp theo kỳ thống kê
 const BangDoanhThu: React.FC<Props> = ({ data, onSelect, selected }) => {
   return (
-    <div className="overflow-x-auto border rounded-md">
+    <div className="overflow-x-auto border rounded-md mt-6">
       <table className="w-full table-auto text-left">
         <thead className="bg-gray-100 text-gray-700">
           <tr>
