@@ -145,68 +145,70 @@ export default function ThanhToanPage() {
   }, [soTienConNo, soTienTra]);
 
   return (
-    <div className="max-w-xl mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Thanh toán hóa đơn</h2>
-      <div className="mb-4 text-sm text-gray-700 bg-blue-50 border-l-4 border-blue-400 p-2 rounded">
-        Số tiền cần thanh toán = <b>tiền thuê sân</b> +{" "}
-        <b>tổng tiền các mặt hàng đã mua</b> trong buổi thuê.
+    <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <h1 className="text-2xl font-bold mb-1 text-center">Thanh toán hóa đơn thuê sân</h1>
+      <p className="text-gray-500 dark:text-gray-300 text-center mb-6">Quản lý thanh toán, cập nhật trạng thái hóa đơn và số tiền khách trả.</p>
+      <div className="mb-6 text-sm text-gray-700 bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+        Số tiền cần thanh toán = <b>tiền thuê sân</b> + <b>tổng tiền các mặt hàng đã mua</b> trong buổi thuê.
       </div>
       {/* Bước 1: Tìm phiếu đặt sân */}
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          handleTimPhieu();
-        }}
-        className="flex gap-2 mb-2"
-      >
-        <input
-          className="border px-2 py-1 rounded flex-1"
-          placeholder="Nhập tên khách hàng để tìm phiếu đặt sân..."
-          value={keyword}
-          onChange={e => setKeyword(e.target.value)}
-        />
-        <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">
-          Tìm kiếm
-        </button>
-      </form>
-      {/* Danh sách phiếu đặt sân */}
-      {phieuList.length > 0 && (
-        <ul className="mb-2">
-          {phieuList.map(phieu => (
-            <li key={phieu.id}>
-              <button
-                onClick={() => handleChonPhieu(phieu)}
-                className={`px-3 py-1 rounded border w-full text-left ${phieuChon?.id === phieu.id ? "bg-blue-500 text-white" : ""}`}
-              >
-                #{phieu.id} - {phieu.ho_ten} ({phieu.sdt}) - Ngày đặt: {phieu.ngay_dat}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {/* Danh sách hóa đơn */}
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Bước 1: Tìm phiếu đặt sân</h2>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleTimPhieu();
+          }}
+          className="flex gap-3 mb-3"
+        >
+          <input
+            className="border px-2 py-1 rounded flex-1 min-w-[220px]"
+            placeholder="Nhập tên khách hàng để tìm phiếu đặt sân..."
+            value={keyword}
+            onChange={e => setKeyword(e.target.value)}
+          />
+          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold shadow">
+            Tìm kiếm
+          </button>
+        </form>
+        {phieuList.length > 0 && (
+          <ul className="flex flex-col gap-2 mt-2">
+            {phieuList.map(phieu => (
+              <li key={phieu.id}>
+                <button
+                  onClick={() => handleChonPhieu(phieu)}
+                  className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${phieuChon?.id === phieu.id ? "bg-blue-500 text-white border-blue-600" : "hover:bg-gray-100"}`}
+                >
+                  #{phieu.id} - {phieu.ho_ten} <span className="text-xs text-gray-500">({phieu.sdt})</span> - Ngày đặt: {phieu.ngay_dat}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      {/* Bước 2: Chọn hóa đơn */}
       {phieuChon && (
-        <div className="mb-2">
-          <div className="font-semibold mb-1">Chọn hóa đơn:</div>
-          <ul>
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 2: Chọn hóa đơn</h2>
+          <ul className="flex flex-col gap-2">
             {hoaDonList.map(hd => (
               <li key={hd.id}>
                 <button
                   onClick={() => handleChonHoaDonFull(hd)}
-                  className={`px-3 py-1 rounded border w-full text-left ${hoaDonChon?.id === hd.id ? "bg-blue-500 text-white" : ""}`}
+                  className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${hoaDonChon?.id === hd.id ? "bg-blue-500 text-white border-blue-600" : "hover:bg-gray-100"}`}
                 >
                   #{hd.id} - Ngày thanh toán: {hd.ngay_thanh_toan} - Tổng tiền: {hd.tong_tien?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                 </button>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
-      {/* Hiển thị bảng mặt hàng đã dùng */}
+      {/* Bước 3: Kiểm tra mặt hàng đã dùng */}
       {hoaDonChon && (
-        <div className="mb-4">
-          <div className="font-semibold mb-1">Mặt hàng đã dùng:</div>
-          <table className="w-full table-auto border rounded shadow mb-2">
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 3: Kiểm tra mặt hàng đã dùng</h2>
+          <table className="w-full table-auto border rounded shadow mb-3">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-2">Tên mặt hàng</th>
@@ -252,12 +254,13 @@ export default function ThanhToanPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </section>
       )}
-      {/* Form thanh toán */}
+      {/* Bước 4: Thanh toán */}
       {hoaDonChon && (
-        <div className="mb-2">
-          <div className="mb-2 text-sm">
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 4: Thanh toán</h2>
+          <div className="mb-3 text-sm">
             <span>Tiền thuê sân: <b>{(hoaDonChon.tien_thue_san || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
             <span>Tổng tiền mặt hàng: <b>{tongTienMatHang.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
             <span>Tổng tiền phải trả: <b>{tongTienPhaiTra.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b></span><br />
@@ -285,14 +288,14 @@ export default function ThanhToanPage() {
           </div>
           <button
             onClick={handleThanhToan}
-            className="bg-green-600 text-white px-4 py-1 rounded w-full"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold w-full shadow"
             disabled={loading}
           >
             {loading ? "Đang xử lý..." : "Xác nhận thanh toán"}
           </button>
-        </div>
+        </section>
       )}
-      {message && <div className="p-2 bg-green-100 text-green-700 rounded mt-2">{message}</div>}
+      {message && <div className="p-4 bg-green-100 text-green-700 rounded text-center font-semibold mt-4">{message}</div>}
     </div>
   );
 }

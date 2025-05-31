@@ -154,95 +154,87 @@ export default function CheckoutPage() {
   const tongTienThanhToan = tongTienSan + tongTienMatHang;
 
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">
-        Checkout buổi thuê & cập nhật mặt hàng đã dùng
-      </h2>
+    <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <h1 className="text-2xl font-bold mb-1 text-center">Checkout buổi thuê & mặt hàng đã dùng</h1>
+      <p className="text-gray-500 dark:text-gray-300 text-center mb-6">Quản lý hóa đơn, mặt hàng, tổng tiền thanh toán cho từng buổi thuê sân.</p>
       {/* Bước 1: Tìm phiếu đặt sân */}
-      <div className="mb-4 border-b pb-4">
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Bước 1: Tìm phiếu đặt sân</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleTimPhieu();
           }}
-          className="flex gap-2 mb-2"
+          className="flex gap-3 mb-3"
         >
           <input
-            className="border px-2 py-1 rounded flex-1"
+            className="border px-2 py-1 rounded flex-1 min-w-[220px]"
             placeholder="Nhập tên khách hàng để tìm phiếu đặt sân..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-1 rounded"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold shadow"
           >
             Tìm phiếu
           </button>
         </form>
         {phieuList.length > 0 && (
           <div className="mt-2">
-            <div className="font-semibold mb-1">Chọn phiếu đặt sân:</div>
+            <div className="font-semibold mb-2">Chọn phiếu đặt sân:</div>
             <ul className="flex flex-col gap-2">
               {phieuList.map((phieu) => (
                 <li key={phieu.id}>
                   <button
-                    onClick={() => handleChonPhieu(phieu)}
-                    className={`px-3 py-1 rounded border w-full text-left ${phieuChon?.id === phieu.id ? "bg-green-500 text-white" : ""
+                    onClick={() => handleChonPhieu(phieu)
+                    }
+                    className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${phieuChon?.id === phieu.id ? "bg-green-500 text-white border-green-600" : "hover:bg-gray-100"
                       }`}
                   >
-                    #{phieu.id} - {phieu.ho_ten} ({phieu.sdt}) - Ngày đặt: {phieu.ngay_dat}
+                    #{phieu.id} - {phieu.ho_ten} <span className="text-xs text-gray-500">({phieu.sdt})</span> - Ngày đặt: {phieu.ngay_dat}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
         )}
-      </div>
+      </section>
       {/* Bước 2: Chọn hóa đơn (buổi thuê) */}
       {phieuChon && (
-        <div className="mb-4 border-b pb-4">
-          <div className="font-semibold mb-1">Chọn hóa đơn (buổi thuê):</div>
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 2: Chọn hóa đơn (buổi thuê)</h2>
           <ul className="flex flex-col gap-2">
             {hoaDonList.map((hd) => (
               <li key={hd.id}>
                 <button
                   onClick={() => handleChonHoaDon(hd)}
-                  className={`px-3 py-1 rounded border w-full text-left ${hoaDonChon?.id === hd.id ? "bg-blue-500 text-white" : ""
-                    }`}
+                  className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${hoaDonChon?.id === hd.id ? "bg-blue-500 text-white border-blue-600" : "hover:bg-gray-100"}`}
                 >
-                  #{hd.id} - Ngày thanh toán: {hd.ngay_thanh_toan} - Tổng tiền: {hd.tong_tien?.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  })}
+                  #{hd.id} - Ngày thanh toán: {hd.ngay_thanh_toan} - Tổng tiền: {hd.tong_tien?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                 </button>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
       {/* Bước 3: Quản lý mặt hàng đã dùng */}
       {hoaDonChon && (
-        <div className="mb-4 border-b pb-4">
-          <div className="flex items-center gap-4 mb-2">
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 3: Quản lý mặt hàng đã dùng</h2>
+          <div className="flex items-center gap-4 mb-3">
             <span className="font-semibold">Mặt hàng đã dùng:</span>
             <button
               onClick={() => setShowAddMH(true)}
-              className="bg-green-600 text-white px-3 py-1 rounded"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold shadow"
             >
               + Thêm mặt hàng
             </button>
             <span className="ml-auto font-semibold">
-              Tổng tiền: {" "}
-              <b>
-                {tongTienMatHang?.toLocaleString("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                })}
-              </b>
+              Tổng tiền: <b>{tongTienMatHang?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</b>
             </span>
           </div>
-          <table className="w-full table-auto border rounded shadow mb-2">
+          <table className="w-full table-auto border rounded shadow mb-3">
             <thead className="bg-gray-100">
               <tr>
                 <th className="p-2">Tên mặt hàng</th>
@@ -261,21 +253,11 @@ export default function CheckoutPage() {
                   <td className="p-2">{mh.don_vi}</td>
                   <td className="p-2">{mh.ngay_su_dung}</td>
                   <td className="p-2">{mh.so_luong}</td>
-                  <td className="p-2">
-                    {mh.gia_ban?.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
-                  </td>
-                  <td className="p-2">
-                    {mh.thanh_tien?.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
-                  </td>
+                  <td className="p-2">{mh.gia_ban?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
+                  <td className="p-2">{mh.thanh_tien?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</td>
                   <td className="p-2">
                     <button
-                      className="bg-red-600 px-2 py-1 rounded text-white"
+                      className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-white font-semibold"
                       onClick={() => handleXoaMH(mh.id)}
                     >
                       Xóa
@@ -289,9 +271,9 @@ export default function CheckoutPage() {
           {showAddMH && (
             <div className="mb-4 p-4 bg-gray-50 rounded shadow">
               <div className="font-semibold mb-2">Thêm mặt hàng đã dùng</div>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-3 mb-3">
                 <input
-                  className="border px-2 py-1 rounded flex-1"
+                  className="border px-2 py-1 rounded flex-1 min-w-[180px]"
                   placeholder="Tìm mặt hàng..."
                   value={searchMH}
                   onChange={(e) => {
@@ -301,7 +283,7 @@ export default function CheckoutPage() {
                 />
                 <button
                   onClick={handleTimMH}
-                  className="bg-blue-500 text-white px-3 py-1 rounded"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-semibold shadow"
                 >
                   Tìm
                 </button>
@@ -316,21 +298,16 @@ export default function CheckoutPage() {
                           setMhForm((f) => ({ ...f, gia_ban: mh.gia_ban }));
                           setMessage("");
                         }}
-                        className={`px-3 py-1 rounded border w-full text-left ${mhChon?.id === mh.id ? "bg-green-500 text-white" : ""
-                          }`}
+                        className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${mhChon?.id === mh.id ? "bg-green-500 text-white border-green-600" : "hover:bg-gray-100"}`}
                       >
-                        {mh.ten} ({mh.don_vi}) - Giá:
-                        {mh.gia_ban?.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
+                        {mh.ten} <span className="text-xs text-gray-500">({mh.don_vi})</span> - Giá: {mh.gia_ban?.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                       </button>
                     </li>
                   ))}
                 </ul>
               )}
               {mhChon && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div className="flex flex-col">
                     <label className="text-xs font-medium mb-1">Ngày sử dụng</label>
                     <input
@@ -374,7 +351,7 @@ export default function CheckoutPage() {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={handleThemMH}
-                  className="bg-green-600 text-white px-4 py-1 rounded"
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold"
                   disabled={!mhChon || !mhForm.ngay_su_dung}
                 >
                   Lưu
@@ -386,37 +363,20 @@ export default function CheckoutPage() {
                     setMhForm({ so_luong: 1, gia_ban: 0, ngay_su_dung: todayStr });
                     setMessage("");
                   }}
-                  className="bg-gray-400 text-white px-4 py-1 rounded"
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded font-semibold"
                 >
                   Hủy
                 </button>
               </div>
             </div>
           )}
-          {/* Bổ sung form nhập giờ nhận/trả sân */}
-          {/* <div className="flex flex-col md:flex-row gap-4 items-end mb-2 bg-gray-50 p-3 rounded shadow">
-            <div className="flex flex-col">
-              Chức năng này tạm bỏ, chưa hoàn thiện
-              <label className="text-xs font-medium mb-1">Giờ nhận sân</label>
-              <input type="time" value={gioNhanSan} onChange={e => setGioNhanSan(e.target.value)} className="border rounded px-2 py-1" />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs font-medium mb-1">Giờ trả sân</label>
-              <input type="time" value={gioTraSan} onChange={e => setGioTraSan(e.target.value)} className="border rounded px-2 py-1" />
-            </div>
-            <button onClick={handleCapNhatGio} className="bg-blue-600 text-white px-4 py-1 rounded">Lưu/Cập nhật giờ</button>
-            <div className="flex flex-col ml-4">
-              <span className="text-xs">Số giờ vượt: <b>{soGioVuot}</b></span>
-              <span className="text-xs">Tiền phạt: <b>{tienPhat.toLocaleString('vi-VN')}đ</b></span>
-            </div>
-          </div> */}
           <div className="font-semibold mb-2">Tiền thuê sân: <b>{tongTienSan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
           <div className="font-semibold mb-2">Tiền mặt hàng đã dùng: <b>{tongTienMatHang.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
-          <div className="font-bold text-lg mb-2 text-blue-700">TỔNG TIỀN THANH TOÁN: <b>{tongTienThanhToan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
-        </div>
+          <div className="font-bold text-lg mb-2 text-blue-700">TỔNG TIỀN CẦN THANH TOÁN: <b>{tongTienThanhToan.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</b></div>
+        </section>
       )}
       {message && (
-        <div className="p-2 bg-green-100 text-green-700 rounded mt-2">
+        <div className="p-3 bg-green-100 text-green-700 rounded text-center font-semibold mt-4">
           {message}
         </div>
       )}

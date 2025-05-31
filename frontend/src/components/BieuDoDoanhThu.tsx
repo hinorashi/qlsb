@@ -10,9 +10,9 @@ interface Props {
 export default function BieuDoDoanhThu({ data }: Props) {
   return (
     <div className="mt-6 bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-      <h2 className="text-xl font-semibold mb-4 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+      {/* <h2 className="text-xl font-semibold mb-4 text-blue-700 dark:text-blue-300 flex items-center gap-2">
         Biểu đồ doanh thu
-      </h2>
+      </h2> */}
       <ResponsiveContainer width="100%" height={350}>
         <BarChart data={data} barSize={80}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

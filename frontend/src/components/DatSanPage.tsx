@@ -166,75 +166,78 @@ export default function DatSanPage() {
   }, [sanChon, gioBatDau, gioKetThuc, ngayBatDau, ngayKetThuc, tenKhach, khachChon]);
 
   return (
-    <div className="max-w-2xl mx-auto p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Tìm và đặt sân</h2>
+    <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <h1 className="text-2xl font-bold mb-1 text-center">Đặt sân bóng mini</h1>
+      <p className="text-gray-500 dark:text-gray-300 text-center mb-6">Chọn sân, xem lịch trống, đặt lịch và xác nhận.</p>
       {/* Bước 1: Tìm sân trống */}
-      <div className="mb-4 border-b pb-4">
-        <div className="flex flex-wrap gap-2 mb-2 items-center">
-          <div className="flex flex-col">
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Bước 1: Tìm sân trống</h2>
+        <div className="flex flex-wrap gap-4 mb-3 items-end">
+          <div className="flex flex-col min-w-[120px]">
             <label className="text-xs font-medium mb-1">Loại sân</label>
             <select value={loaiSan} onChange={e => setLoaiSan(e.target.value)} className="border rounded px-2 py-1">
               <option value="7">Sân 7</option>
               <option value="11">Sân 11</option>
             </select>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-[120px]">
             <label className="text-xs font-medium mb-1">Giờ bắt đầu</label>
             <input type="time" value={gioBatDau} onChange={e => setGioBatDau(e.target.value)} className="border rounded px-2 py-1" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-[120px]">
             <label className="text-xs font-medium mb-1">Giờ kết thúc</label>
             <input type="time" value={gioKetThuc} onChange={e => setGioKetThuc(e.target.value)} className="border rounded px-2 py-1" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-[150px]">
             <label className="text-xs font-medium mb-1">Ngày bắt đầu</label>
             <input type="date" value={ngayBatDau} onChange={e => setNgayBatDau(e.target.value)} className="border rounded px-2 py-1" />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-[150px]">
             <label className="text-xs font-medium mb-1">Ngày kết thúc</label>
             <input type="date" value={ngayKetThuc} onChange={e => setNgayKetThuc(e.target.value)} className="border rounded px-2 py-1" />
           </div>
-          <button onClick={handleTimSan} className="bg-blue-500 text-white px-3 py-1 rounded whitespace-nowrap self-end">Tìm sân</button>
+          <button onClick={handleTimSan} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold shadow">Tìm sân</button>
         </div>
         {sanTrong.length > 0 && (
           <div className="mt-2">
-            <div className="font-semibold mb-1">Chọn sân:</div>
-            <ul className="flex gap-2">
+            <div className="font-semibold mb-2">Chọn sân:</div>
+            <ul className="flex flex-wrap gap-3">
               {sanTrong.map(san => (
                 <li key={san.id}>
                   <button
                     onClick={() => setSanChon(san)}
-                    className={`px-3 py-1 rounded border ${sanChon?.id === san.id ? 'bg-green-500 text-white' : ''}`}
+                    className={`px-4 py-2 rounded border font-medium transition-colors duration-150 ${sanChon?.id === san.id ? 'bg-green-500 text-white border-green-600' : 'hover:bg-gray-100'}`}
                   >
-                    {san.ten_san} ({san.gia_thue_theo_gio?.toLocaleString('vi-VN')}đ/giờ)
+                    {san.ten_san} <span className="text-xs text-gray-500">({san.gia_thue_theo_gio?.toLocaleString('vi-VN')}đ/giờ)</span>
                   </button>
                 </li>
               ))}
             </ul>
           </div>
         )}
-      </div>
+      </section>
       {/* Bước 2: Tìm/chọn khách hàng */}
       {sanChon && (
-        <div className="mb-4 border-b pb-4">
-          <div className="flex gap-2 mb-2">
-            <input type="text" value={tenKhach} onChange={e => setTenKhach(e.target.value)} placeholder="Tên khách hàng" className="border rounded px-2 py-1" />
-            <button onClick={handleTimKhach} className="bg-blue-500 text-white px-3 py-1 rounded">Tìm khách</button>
-            <button onClick={() => setShowThemKhach(true)} className="bg-gray-500 text-white px-3 py-1 rounded">Thêm mới</button>
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 2: Chọn khách hàng</h2>
+          <div className="flex flex-wrap gap-3 mb-3">
+            <input type="text" value={tenKhach} onChange={e => setTenKhach(e.target.value)} placeholder="Tên khách hàng" className="border rounded px-2 py-1 min-w-[180px]" />
+            <button onClick={handleTimKhach} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold shadow">Tìm khách</button>
+            <button onClick={() => setShowThemKhach(true)} className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-semibold shadow">Thêm mới</button>
           </div>
           {dsKhach.length > 0 && (
             <ul className="flex flex-col gap-2">
               {dsKhach.map(kh => (
                 <li key={kh.id}>
-                  <button onClick={() => setKhachChon(kh)} className={`px-3 py-1 rounded border w-full text-left ${khachChon?.id === kh.id ? 'bg-green-500 text-white' : ''}`}>
-                    {kh.ho_ten} ({kh.sdt})
+                  <button onClick={() => setKhachChon(kh)} className={`px-4 py-2 rounded border w-full text-left font-medium transition-colors duration-150 ${khachChon?.id === kh.id ? 'bg-green-500 text-white border-green-600' : 'hover:bg-gray-100'}`}>
+                    {kh.ho_ten} <span className="text-xs text-gray-500">({kh.sdt})</span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
           {showThemKhach && (
-            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 bg-gray-50 p-3 rounded shadow w-full">
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded shadow w-full">
               <div className="flex flex-col">
                 <label className="text-xs font-medium mb-1">Họ tên</label>
                 <input type="text" placeholder="Họ tên" value={newKhach.ho_ten} onChange={e => setNewKhach(k => ({ ...k, ho_ten: e.target.value }))} className="border rounded px-2 py-1" />
@@ -248,28 +251,29 @@ export default function DatSanPage() {
                 <input type="email" placeholder="Email" value={newKhach.email} onChange={e => setNewKhach(k => ({ ...k, email: e.target.value }))} className="border rounded px-2 py-1" />
               </div>
               <div className="flex gap-2 col-span-full mt-2">
-                <button onClick={handleThemKhach} className="bg-green-500 text-white px-3 py-1 rounded">Lưu</button>
-                <button onClick={() => setShowThemKhach(false)} className="bg-gray-300 px-3 py-1 rounded">Hủy</button>
+                <button onClick={handleThemKhach} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold">Lưu</button>
+                <button onClick={() => setShowThemKhach(false)} className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded font-semibold">Hủy</button>
               </div>
             </div>
           )}
-        </div>
+        </section>
       )}
-      {/* Bước 3: Nhập giá thuê, xác nhận đặt sân */}
+      {/* Bước 3: Xác nhận đặt sân */}
       {sanChon && khachChon && (
-        <div className="mb-4 border-b pb-4">
-          <div className="flex flex-col gap-1 mb-2">
+        <section className="mb-6 border-b pb-6">
+          <h2 className="text-lg font-semibold mb-3">Bước 3: Xác nhận đặt sân</h2>
+          <div className="flex flex-col gap-2 mb-3">
             <span>Giá thuê 1 buổi: <b>{giaThue?.toLocaleString()}đ</b></span>
             <span>Số buổi: <b>{soBuoi ?? tinhSoBuoi(ngayBatDau, ngayKetThuc)}</b></span>
             {typeof tongTien === "number" && typeof tienCoc === "number" && (
               <span>Tổng tiền: <b>{tongTien.toLocaleString()}đ</b> | Đặt cọc: <b>{tienCoc.toLocaleString()}đ</b></span>
             )}
           </div>
-          <button onClick={handleDatSan} className="bg-green-600 text-white px-4 py-2 rounded">Xác nhận đặt sân</button>
-        </div>
+          <button onClick={handleDatSan} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold shadow">Xác nhận đặt sân</button>
+        </section>
       )}
       {/* Kết quả */}
-      {ketQua && <div className="p-3 bg-green-100 text-green-700 rounded">{ketQua}</div>}
+      {ketQua && <div className="p-4 bg-green-100 text-green-700 rounded text-center font-semibold mt-4">{ketQua}</div>}
     </div>
   );
 }

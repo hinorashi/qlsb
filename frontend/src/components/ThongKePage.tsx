@@ -30,16 +30,29 @@ export default function ThongKePage() {
   }, [selected, chuki]);
 
   return (
-    <div className="max-w-full p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Thống kê doanh thu</h1>
-      <FilterBar chuki={chuki} setChuki={setChuki} nam={nam} setNam={setNam} />
-      {/* Biểu đồ doanh thu */}
-      <BieuDoDoanhThu data={revenues} />
-      {/* <TrendLineChart data={revenues} /> */}
-      {/* Bảng doanh thu tổng hợp */}
-      <BangDoanhThu data={revenues} onSelect={setSelected} selected={selected} />
-      {/* Hiển thị chi tiết hóa đơn nếu đã chọn */}
-      {selected && <ChiTietHoaDon invoices={invoices} />}
+    <div className="w-full bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <h1 className="text-2xl font-bold mb-1 text-center">Thống kê doanh thu</h1>
+      <p className="text-gray-500 dark:text-gray-300 text-center mb-6">
+        Xem báo cáo doanh thu, biểu đồ, bảng tổng hợp và chi tiết hóa đơn từng kỳ.
+      </p>
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Bộ lọc thống kê</h2>
+        <FilterBar chuki={chuki} setChuki={setChuki} nam={nam} setNam={setNam} />
+      </section>
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Biểu đồ doanh thu</h2>
+        <BieuDoDoanhThu data={revenues} />
+      </section>
+      <section className="mb-6 border-b pb-6">
+        <h2 className="text-lg font-semibold mb-3">Bảng doanh thu tổng hợp theo kỳ</h2>
+        <BangDoanhThu data={revenues} onSelect={setSelected} selected={selected} />
+      </section>
+      {selected && (
+        <section>
+          {/* <h2 className="text-lg font-semibold mb-3">Chi tiết hóa đơn</h2> */}
+          <ChiTietHoaDon invoices={invoices} />
+        </section>
+      )}
     </div>
   );
 }

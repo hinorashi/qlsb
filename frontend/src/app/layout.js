@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 min-h-screen`}
       >
-        <header className="w-full max-w-4xl mx-auto px-4 py-2 items-center flex flex-col">
+        <header className="w-full max-w-4xl mx-auto px-4 py-2 flex flex-col items-center">
           <nav className="flex gap-4 mb-4">
             <Link href="/" className="text-blue-700 font-semibold hover:underline">
               Trang chủ
@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
             </Link>
           </nav>
         </header>
-        <main className="max-w-4xl mx-auto px-4 pb-8 gap-8 items-center flex flex-col min-h-screen">
+        <main className="w-full max-w-4xl flex-1 flex flex-col gap-8 px-4 pb-8 mx-auto">
           {children}
         </main>
         <footer className="p-4 text-sm text-center text-gray-400">
