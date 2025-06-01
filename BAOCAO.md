@@ -56,17 +56,25 @@ graph LR
     actor_NV((Nhân viên))
     actor_QL((Quản lý))
 
+    %% SUBGRAPH: QUẢN LÝ SÂN BÓNG
+    subgraph Quản lý sân bóng
+        UC_ThemSan[Thêm sân bóng]
+        UC_SuaSan[Sửa sân bóng]
+        UC_XoaSan[Xoá sân bóng]
+    end
+
     %% SUBGRAPH: ĐẶT SÂN
     subgraph Đặt sân
         UC_DatSan[Đặt sân]
+        UC_ThemKhachHang[Thêm khách hàng]
         UC_InPhieu[In phiếu đặt sân]
         UC_DatSan --> UC_InPhieu
     end
 
-    %% SUBGRAPH: MẶT HÀNG & CHECKOUT
-    subgraph Cập nhật buổi thuê
-        UC_CapNhatMatHang[Cập nhật mặt hàng đã dùng]
+    %% SUBGRAPH: CHECKOUT & CẬP NHẬT MẶT HÀNG ĐÃ DÙNG
+    subgraph Checkout buổi thuê
         UC_CheckOut[Check-out buổi thuê]
+        UC_CapNhatMatHang[Cập nhật mặt hàng đã dùng]
     end
 
     %% SUBGRAPH: THANH TOÁN
@@ -83,27 +91,20 @@ graph LR
         UC_XemTK --> UC_XemChiTietHoaDon
     end
 
-    %% SUBGRAPH: QUẢN LÝ SÂN BÓNG
-    subgraph Quản lý sân bóng
-        UC_ThemSan[Thêm sân bóng]
-        UC_SuaSan[Sửa sân bóng]
-        UC_XoaSan[Xoá sân bóng]
-    end
-
     %% LIÊN KẾT
-    actor_KH --> UC_DatSan
-    actor_KH --> UC_TraTien
-    actor_KH --> UC_NhanHoaDon
-
-    actor_NV --> UC_DatSan
-    actor_NV --> UC_CapNhatMatHang
-    actor_NV --> UC_CheckOut
-    actor_NV --> UC_TraTien
-
     actor_QL --> UC_ThemSan
     actor_QL --> UC_SuaSan
     actor_QL --> UC_XoaSan
     actor_QL --> UC_XemTK
+
+    actor_NV --> UC_CheckOut
+    actor_NV --> UC_CapNhatMatHang
+    actor_NV --> UC_ThemKhachHang
+    actor_NV --> UC_DatSan
+    actor_KH -. gián tiếp qua NV .-> UC_DatSan
+    actor_NV --> UC_TraTien
+    actor_KH -. gián tiếp qua NV .-> UC_TraTien
+    actor_KH -. gián tiếp qua NV .-> UC_NhanHoaDon
 ```
 
 #### 1.4. Kịch bản & ngoại lệ
@@ -118,7 +119,7 @@ graph LR
 
 Bao gồm các luồng xử lí sau:
 - Quản lý sân bóng
-- Đặt sân
+- Đặt sân (_đã bao gồm luồng quản lý khách hàng_)
 - Checkout và cập nhật mặt hàng đã dùng
 - Thanh toán và xuất hóa đơn
 - Xem thống kê doanh thu → xem chi tiết hóa đơn
@@ -296,28 +297,6 @@ Giải thích:
 
 #### 2.1. Sơ đồ lớp
 
-Các lớp trong hệ thống được thiết kế như sau:
-
-- **SanBong**: Đại diện cho sân bóng (có thể có thuộc tính để phân biệt sân mini/lớn, trạng thái, vị trí, ...)
-- **KhachHang**: Thông tin khách hàng (tên, địa chỉ, SĐT, email, ...)
-- **PhieuDatSan**: Phiếu đặt sân (ngày đặt, ngày bắt đầu, ngày kết thúc, tổng tiền dự kiến, số tiền đặt cọc, trạng thái, ...)
-- **ChiTietDatSan**: Chi tiết từng sân mini trong một phiếu đặt (mã sân, khung giờ, giá thuê, số buổi, ...)
-- **HoaDon**: Hóa đơn thanh toán (ngày lập, tổng tiền, số tiền đã trả, số tiền còn nợ, trạng thái, ...)
-- **MatHang**: Mặt hàng bán kèm (mã, tên, đơn giá, nhà cung cấp, ...)
-- **ChiTietHoaDon**: Chi tiết mặt hàng đã dùng trong từng buổi (mã mặt hàng, số lượng, đơn giá, thành tiền, ...)
-- **NhaCungCap**: Thông tin nhà cung cấp mặt hàng (mã, tên, địa chỉ, SĐT, email, ...)
-
-Quan hệ giữa các lớp:
-- Mỗi khách hàng có thể có nhiều phiếu đặt sân.
-- Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (tương ứng từng sân, từng khung giờ).
-- Mỗi phiếu đặt sân có thể sinh ra một hóa đơn.
-- Mỗi hóa đơn có nhiều chi tiết hóa đơn (các mặt hàng đã dùng).
-- Mỗi mặt hàng thuộc về một nhà cung cấp.
-- Mỗi chi tiết hóa đơn liên kết với một mặt hàng.
-- Mỗi chi tiết đặt sân liên kết với một sân bóng.
-
-Sơ đồ lớp:
-
 ```mermaid
 classDiagram
     class SanBong {
@@ -399,6 +378,26 @@ classDiagram
     NhaCungCap "1" --o "0..*" MatHang
     SanBong "1" --o "0..*" ChiTietDatSan
 ```
+
+Các lớp trong hệ thống được thiết kế như sau:
+
+- **SanBong**: Đại diện cho sân bóng (có thể có thuộc tính để phân biệt sân mini/lớn, trạng thái, vị trí, ...)
+- **KhachHang**: Thông tin khách hàng (tên, địa chỉ, SĐT, email, ...)
+- **PhieuDatSan**: Phiếu đặt sân (ngày đặt, ngày bắt đầu, ngày kết thúc, tổng tiền dự kiến, số tiền đặt cọc, trạng thái, ...)
+- **ChiTietDatSan**: Chi tiết từng sân mini trong một phiếu đặt (mã sân, khung giờ, giá thuê, số buổi, ...)
+- **HoaDon**: Hóa đơn thanh toán (ngày lập, tổng tiền, số tiền đã trả, số tiền còn nợ, trạng thái, ...)
+- **MatHang**: Mặt hàng bán kèm (mã, tên, đơn giá, nhà cung cấp, ...)
+- **ChiTietHoaDon**: Chi tiết mặt hàng đã dùng trong từng buổi (mã mặt hàng, số lượng, đơn giá, thành tiền, ...)
+- **NhaCungCap**: Thông tin nhà cung cấp mặt hàng (mã, tên, địa chỉ, SĐT, email, ...)
+
+Quan hệ giữa các lớp:
+- Mỗi khách hàng có thể có nhiều phiếu đặt sân.
+- Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (tương ứng từng sân, từng khung giờ).
+- Mỗi phiếu đặt sân có thể sinh ra một hóa đơn.
+- Mỗi hóa đơn có nhiều chi tiết hóa đơn (các mặt hàng đã dùng).
+- Mỗi mặt hàng thuộc về một nhà cung cấp.
+- Mỗi chi tiết hóa đơn liên kết với một mặt hàng.
+- Mỗi chi tiết đặt sân liên kết với một sân bóng.
 
 #### 2.2. Sơ đồ CSDL
 
