@@ -151,7 +151,6 @@ erDiagram
     phieu_dat_san ||--|| hoa_don : tao_hoa_don
     hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
     mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
-    mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
 ```
 
 ### 2. Thiết kế hệ thống
