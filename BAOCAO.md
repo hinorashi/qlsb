@@ -117,40 +117,85 @@ graph LR
 #### 2.1. Sơ đồ tuần tự
 
 Bao gồm các luồng xử lí sau:
+- Quản lý sân bóng
 - Đặt sân
 - Checkout và cập nhật mặt hàng đã dùng
 - Thanh toán và xuất hóa đơn
 - Xem thống kê doanh thu → xem chi tiết hóa đơn
 
-#### 2.1.1 Đặt sân
+#### 2.1.1. Quản lý sân bóng
 
 ```mermaid
 sequenceDiagram
-    participant User as Nhân viên (User)
+    actor User as Quản lý/Nhân viên (User)
     participant View as Frontend (React/Next.js)
-    participant Controller as API Route (Express Controller)
+    participant Controller as Backend API (Expressjs)
     participant Model as Model/Database (SQLite)
 
-    User->>View: Mở trang Đặt sân, nhập thông tin (loại sân, giờ, ngày)
-    View->>Controller: GET /sanbong/trong (Tìm sân trống)
-    Controller->>Model: Truy vấn sân còn trống theo giờ/ngày
-    Model-->>Controller: Danh sách sân trống
-    Controller-->>View: Trả về danh sách sân trống
-    View-->>User: Hiển thị danh sách, chọn sân
+    User->>+View: Nhập từ khóa tìm kiếm sân bóng
+    View->>+Controller: GET /sanbong?tukhoa=... (Tìm kiếm sân bóng)
+    Controller->>+Model: Truy vấn danh sách sân bóng theo từ khóa
+    Model-->>-Controller: Danh sách sân bóng
+    Controller-->>-View: Trả về danh sách sân bóng
+    View-->>-User: Hiển thị danh sách sân bóng
 
-    User->>View: Nhập/tìm thông tin khách hàng
-    View->>Controller: GET /khachhang (Tìm khách hàng)
-    Controller->>Model: Truy vấn khách hàng theo tên/sdt
-    Model-->>Controller: Danh sách khách hàng
-    Controller-->>View: Trả về danh sách khách hàng
-    View-->>User: Hiển thị, chọn hoặc thêm mới khách hàng
-    User->>View: Xác nhận thông tin đặt sân
+    User->>+View: Chọn thêm mới sân bóng, nhập thông tin
+    View->>+Controller: POST /sanbong (Thêm mới sân bóng)
+    Controller->>+Model: Lưu thông tin sân bóng mới
+    Model-->>-Controller: Kết quả thêm mới
+    Controller-->>-View: Thông báo thành công/thất bại
+    View-->>-User: Hiển thị thông báo
 
-    View->>Controller: POST /datsan (Gửi thông tin đặt sân)
-    Controller->>Model: Tạo phiếu đặt sân, chi tiết đặt sân, tính tiền cọc
-    Model-->>Controller: Kết quả tạo phiếu, chi tiết, số tiền cọc
-    Controller-->>View: Trả về thông tin phiếu đặt sân, số tiền cọc
-    View-->>User: Hiển thị phiếu đặt sân, thông báo thành công
+    User->>+View: Chọn sửa sân bóng, nhập thông tin mới
+    View->>+Controller: PUT /sanbong/:id (Cập nhật sân bóng)
+    Controller->>+Model: Cập nhật thông tin sân bóng
+    Model-->>-Controller: Kết quả cập nhật
+    Controller-->>-View: Thông báo thành công/thất bại
+    View-->>-User: Hiển thị thông báo
+
+    User->>+View: Chọn xóa sân bóng
+    View->>+Controller: DELETE /sanbong/:id (Xóa sân bóng)
+    Controller->>+Model: Xóa sân bóng khỏi CSDL
+    Model-->>-Controller: Kết quả xóa
+    Controller-->>-View: Thông báo thành công/thất bại
+    View-->>-User: Hiển thị thông báo
+```
+
+Giải thích:
+- Quản lý hoặc nhân viên thao tác trên giao diện để tìm kiếm, thêm mới, sửa, xóa sân bóng.
+- Frontend gửi request đến backend (API Express) để thực hiện các thao tác CRUD với sân bóng.
+- Backend xử lý logic nghiệp vụ, truy vấn/cập nhật dữ liệu trong SQLite, trả kết quả về frontend.
+- Giao diện hiển thị danh sách, thông báo kết quả thao tác cho người dùng.
+
+#### 2.1.2. Đặt sân
+
+```mermaid
+sequenceDiagram
+    actor User as Nhân viên (User)
+    participant View as Frontend (React/Next.js)
+    participant Controller as Backend API (Expressjs)
+    participant Model as Model/Database (SQLite)
+
+    User->>+View: Mở trang Đặt sân, nhập thông tin (loại sân, giờ, ngày)
+    View->>+Controller: GET /sanbong/trong (Tìm sân trống)
+    Controller->>+Model: Truy vấn sân còn trống theo giờ/ngày
+    Model-->>-Controller: Danh sách sân trống
+    Controller-->>-View: Trả về danh sách sân trống
+    View-->>-User: Hiển thị danh sách, chọn sân
+
+    User->>+View: Nhập/tìm thông tin khách hàng
+    View->>+Controller: GET /khachhang (Tìm khách hàng)
+    Controller->>+Model: Truy vấn khách hàng theo tên/sdt
+    Model-->>-Controller: Danh sách khách hàng
+    Controller-->>-View: Trả về danh sách khách hàng
+    View-->>-User: Hiển thị, chọn hoặc thêm mới khách hàng
+    User->>+View: Xác nhận thông tin đặt sân
+
+    View->>+Controller: POST /datsan (Gửi thông tin đặt sân)
+    Controller->>+Model: Tạo phiếu đặt sân, chi tiết đặt sân, tính tiền cọc
+    Model-->>-Controller: Kết quả tạo phiếu, chi tiết, số tiền cọc
+    Controller-->>-View: Trả về thông tin phiếu đặt sân, số tiền cọc
+    View-->>-User: Hiển thị phiếu đặt sân, thông báo thành công
 ```
 
 Giải thích:
@@ -159,28 +204,28 @@ Giải thích:
 - Backend xử lý logic nghiệp vụ, truy vấn/tạo dữ liệu trong SQLite, trả kết quả về frontend.
 - Giao diện hiển thị kết quả đặt sân, số tiền cọc, thông báo thành công cho nhân viên.
 
-##### 2.1.2 Checkout và cập nhật mặt hàng đã dùng
+##### 2.1.3. Checkout và cập nhật mặt hàng đã dùng
 
 ```mermaid
 sequenceDiagram
-    participant User as Nhân viên (User)
+    actor User as Nhân viên (User)
     participant View as Frontend (React/Next.js)
-    participant Controller as API Route (Express Controller)
+    participant Controller as Backend API (Expressjs)
     participant Model as Model/Database (SQLite)
 
-    User->>View: Chọn phiếu đặt sân, chọn hóa đơn (buổi thuê)
-    View->>Controller: GET /checkout/hoadon (Lấy danh sách hóa đơn)
-    Controller->>Model: Truy vấn hóa đơn theo phiếu đặt sân
-    Model-->>Controller: Danh sách hóa đơn
-    Controller-->>View: Trả về danh sách hóa đơn
-    View-->>User: Hiển thị danh sách hóa đơn, chọn hóa đơn
+    User->>+View: Chọn phiếu đặt sân, chọn hóa đơn (buổi thuê)
+    View->>+Controller: GET /checkout/hoadon (Lấy danh sách hóa đơn)
+    Controller->>+Model: Truy vấn hóa đơn theo phiếu đặt sân
+    Model-->>-Controller: Danh sách hóa đơn
+    Controller-->>-View: Trả về danh sách hóa đơn
+    View-->>-User: Hiển thị danh sách hóa đơn, chọn hóa đơn
 
-    User->>View: Thêm mặt hàng đã dùng (chọn mặt hàng, nhập số lượng, giá, ngày dùng)
-    View->>Controller: POST /checkout/mathang (Thêm mặt hàng đã dùng)
-    Controller->>Model: Lưu mặt hàng vào chi tiết hóa đơn, cập nhật tổng tiền hóa đơn
-    Model-->>Controller: Kết quả cập nhật
-    Controller-->>View: Trả về hóa đơn đã cập nhật
-    View-->>User: Hiển thị hóa đơn, mặt hàng đã dùng
+    User->>+View: Thêm mặt hàng đã dùng (chọn mặt hàng, nhập số lượng, giá, ngày dùng)
+    View->>+Controller: POST /checkout/mathang (Thêm mặt hàng đã dùng)
+    Controller->>+Model: Lưu mặt hàng vào chi tiết hóa đơn, cập nhật tổng tiền hóa đơn
+    Model-->>-Controller: Kết quả cập nhật
+    Controller-->>-View: Trả về hóa đơn đã cập nhật
+    View-->>-User: Hiển thị hóa đơn, mặt hàng đã dùng
 ```
 
 Giải thích:
@@ -189,28 +234,28 @@ Giải thích:
 - Backend xử lý logic nghiệp vụ, truy vấn/tạo dữ liệu trong SQLite, trả kết quả về frontend.
 - Giao diện hiển thị kết quả hóa đơn, mặt hàng đã dùng cho nhân viên.
 
-#### 2.1.3 Thanh toán và xuất hóa đơn
+#### 2.1.4. Thanh toán và xuất hóa đơn
 
 ```mermaid
 sequenceDiagram
-    participant User as Nhân viên (User)
+    actor User as Nhân viên (User)
     participant View as Frontend (React/Next.js)
-    participant Controller as API Route (Express Controller)
+    participant Controller as Backend API (Expressjs)
     participant Model as Model/Database (SQLite)
 
-    User->>View: Chọn hóa đơn để thanh toán
-    View->>Controller: GET /thanh-toan (Lấy thông tin hóa đơn)
-    Controller->>Model: Truy vấn hóa đơn theo ID
-    Model-->>Controller: Thông tin hóa đơn
-    Controller-->>View: Trả về thông tin hóa đơn
-    View-->>User: Hiển thị thông tin hóa đơn
+    User->>+View: Chọn hóa đơn để thanh toán
+    View->>+Controller: GET /thanh-toan (Lấy thông tin hóa đơn)
+    Controller->>+Model: Truy vấn hóa đơn theo ID
+    Model-->>-Controller: Thông tin hóa đơn
+    Controller-->>-View: Trả về thông tin hóa đơn
+    View-->>-User: Hiển thị thông tin hóa đơn
 
-    User->>View: Nhập số tiền khách trả
-    View->>Controller: POST /thanh-toan (Gửi thông tin thanh toán)
-    Controller->>Model: Cập nhật trạng thái hóa đơn, lưu thông tin thanh toán
-    Model-->>Controller: Kết quả cập nhật
-    Controller-->>View: Trả về thông tin hóa đơn đã thanh toán
-    View-->>User: Hiển thị thông tin hóa đơn đã thanh toán
+    User->>+View: Nhập số tiền khách trả
+    View->>+Controller: POST /thanh-toan (Gửi thông tin thanh toán)
+    Controller->>+Model: Cập nhật trạng thái hóa đơn, lưu thông tin thanh toán
+    Model-->>-Controller: Kết quả cập nhật
+    Controller-->>-View: Trả về thông tin hóa đơn đã thanh toán
+    View-->>-User: Hiển thị thông tin hóa đơn đã thanh toán
 ```
 
 Giải thích:
@@ -219,28 +264,28 @@ Giải thích:
 - Backend xử lý logic nghiệp vụ, truy vấn/cập nhật dữ liệu trong SQLite, trả kết quả về frontend.
 - Giao diện hiển thị kết quả hóa đơn đã thanh toán cho nhân viên.
 
-#### 2.1.4 Xem thống kê doanh thu
+#### 2.1.5. Xem thống kê doanh thu
 
 ```mermaid
 sequenceDiagram
-    participant User as Nhân viên/Admin (User)
+    actor User as Nhân viên/Admin (User)
     participant View as Frontend (React/Next.js)
-    participant Controller as API Route (Express Controller)
+    participant Controller as Backend API (Expressjs)
     participant Model as Model/Database (SQLite)
 
-    User->>View: Truy cập trang Thống kê doanh thu, chọn bộ lọc (chu kỳ, năm)
-    View->>Controller: GET /thongke?chuki=...&nam=... (Lấy dữ liệu doanh thu)
-    Controller->>Model: Truy vấn tổng hợp doanh thu theo chu kỳ/năm
-    Model-->>Controller: Dữ liệu doanh thu tổng hợp
-    Controller-->>View: Trả về dữ liệu doanh thu
-    View-->>User: Hiển thị biểu đồ, bảng doanh thu
+    User->>+View: Truy cập trang Thống kê doanh thu, chọn bộ lọc (chu kỳ, năm)
+    View->>+Controller: GET /thongke?chuki=...&nam=... (Lấy dữ liệu doanh thu)
+    Controller->>+Model: Truy vấn tổng hợp doanh thu theo chu kỳ/năm
+    Model-->>-Controller: Dữ liệu doanh thu tổng hợp
+    Controller-->>-View: Trả về dữ liệu doanh thu
+    View-->>-User: Hiển thị biểu đồ, bảng doanh thu
 
-    User->>View: Chọn kỳ/tháng/năm cụ thể để xem chi tiết
-    View->>Controller: GET /thongke/chitiet?chuki=...&id=... (Lấy chi tiết hóa đơn)
-    Controller->>Model: Truy vấn chi tiết hóa đơn theo kỳ
-    Model-->>Controller: Danh sách hóa đơn chi tiết
-    Controller-->>View: Trả về danh sách hóa đơn chi tiết
-    View-->>User: Hiển thị bảng chi tiết hóa đơn
+    User->>+View: Chọn kỳ/tháng/năm cụ thể để xem chi tiết
+    View->>+Controller: GET /thongke/chitiet?chuki=...&id=... (Lấy chi tiết hóa đơn)
+    Controller->>+Model: Truy vấn chi tiết hóa đơn theo kỳ
+    Model-->>-Controller: Danh sách hóa đơn chi tiết
+    Controller-->>-View: Trả về danh sách hóa đơn chi tiết
+    View-->>-User: Hiển thị bảng chi tiết hóa đơn
 ```
 
 Giải thích:
