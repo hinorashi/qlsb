@@ -296,7 +296,109 @@ Giải thích:
 
 #### 2.1. Sơ đồ lớp
 
-  - SanBong, KhachHang, PhieuDatSan, ChiTietDatSan, HoaDon, MatHang, ChiTietHoaDon
+Các lớp trong hệ thống được thiết kế như sau:
+
+- **SanBong**: Đại diện cho sân bóng (có thể có thuộc tính để phân biệt sân mini/lớn, trạng thái, vị trí, ...)
+- **KhachHang**: Thông tin khách hàng (tên, địa chỉ, SĐT, email, ...)
+- **PhieuDatSan**: Phiếu đặt sân (ngày đặt, ngày bắt đầu, ngày kết thúc, tổng tiền dự kiến, số tiền đặt cọc, trạng thái, ...)
+- **ChiTietDatSan**: Chi tiết từng sân mini trong một phiếu đặt (mã sân, khung giờ, giá thuê, số buổi, ...)
+- **HoaDon**: Hóa đơn thanh toán (ngày lập, tổng tiền, số tiền đã trả, số tiền còn nợ, trạng thái, ...)
+- **MatHang**: Mặt hàng bán kèm (mã, tên, đơn giá, nhà cung cấp, ...)
+- **ChiTietHoaDon**: Chi tiết mặt hàng đã dùng trong từng buổi (mã mặt hàng, số lượng, đơn giá, thành tiền, ...)
+- **NhaCungCap**: Thông tin nhà cung cấp mặt hàng (mã, tên, địa chỉ, SĐT, email, ...)
+
+Quan hệ giữa các lớp:
+- Mỗi khách hàng có thể có nhiều phiếu đặt sân.
+- Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (tương ứng từng sân, từng khung giờ).
+- Mỗi phiếu đặt sân có thể sinh ra một hóa đơn.
+- Mỗi hóa đơn có nhiều chi tiết hóa đơn (các mặt hàng đã dùng).
+- Mỗi mặt hàng thuộc về một nhà cung cấp.
+- Mỗi chi tiết hóa đơn liên kết với một mặt hàng.
+- Mỗi chi tiết đặt sân liên kết với một sân bóng.
+
+Sơ đồ lớp:
+
+```mermaid
+classDiagram
+    class SanBong {
+        +id: int
+        +ten: string
+        +loai: string
+        +trangThai: string
+        +viTri: string
+    }
+
+    class KhachHang {
+        +id: int
+        +ten: string
+        +diaChi: string
+        +sdt: string
+        +email: string
+    }
+
+    class NhaCungCap {
+        +id: int
+        +ten: string
+        +diaChi: string
+        +email: string
+        +sdt: string
+        +moTa: string
+    }
+
+    class MatHang {
+        +id: int
+        +ten: string
+        +donGia: float
+        +nhaCungCapId: int
+    }
+
+    class PhieuDatSan {
+        +id: int
+        +ngayDat: date
+        +ngayBatDau: date
+        +ngayKetThuc: date
+        +tongTienDuKien: float
+        +tienDatCoc: float
+        +trangThai: string
+        +khachHangId: int
+    }
+
+    class ChiTietDatSan {
+        +id: int
+        +phieuDatSanId: int
+        +sanBongId: int
+        +khungGio: string
+        +giaThue: float
+        +soBuoi: int
+    }
+
+    class HoaDon {
+        +id: int
+        +phieuDatSanId: int
+        +ngayLap: date
+        +tongTien: float
+        +daTra: float
+        +conNo: float
+        +trangThai: string
+    }
+
+    class ChiTietHoaDon {
+        +id: int
+        +hoaDonId: int
+        +matHangId: int
+        +soLuong: int
+        +donGia: float
+        +thanhTien: float
+    }
+
+    KhachHang "1" --o "0..*" PhieuDatSan
+    PhieuDatSan "1" --o "1..*" ChiTietDatSan
+    PhieuDatSan "1" --o "0..1" HoaDon
+    HoaDon "1" --o "0..*" ChiTietHoaDon
+    MatHang "1" --o "0..*" ChiTietHoaDon
+    NhaCungCap "1" --o "0..*" MatHang
+    SanBong "1" --o "0..*" ChiTietDatSan
+```
 
 #### 2.2. Sơ đồ CSDL
 
