@@ -140,9 +140,6 @@ Các thực thể chính trong hệ thống:
 | `hoa_don`                   | Hóa đơn thanh toán cuối kỳ                                         |
 | `mat_hang`                  | Đồ ăn, nước uống bán kèm                                           |
 | `chi_tiet_su_dung_mat_hang` | Danh sách mặt hàng sử dụng mỗi buổi                                |
-| `nha_cung_cap`              | Nguồn cung cấp mặt hàng                                            |
-| `phieu_nhap_hang`           | Hóa đơn nhập hàng                                                  |
-| `chi_tiet_phieu_nhap`       | Mặt hàng nhập cụ thể của 1 phiếu                                   |
 
 Quan hệ giữa các thực thể:
 
@@ -154,8 +151,6 @@ erDiagram
     phieu_dat_san ||--|| hoa_don : tao_hoa_don
     hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
     mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
-    nha_cung_cap ||--o{ phieu_nhap_hang : cung_cap
-    phieu_nhap_hang ||--o{ chi_tiet_phieu_nhap : co
     mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
 ```
 
@@ -360,15 +355,6 @@ classDiagram
         +email: string
     }
 
-    class NhaCungCap {
-        +id: int
-        +ten: string
-        +dia_chi: string
-        +email: string
-        +dien_thoai: string
-        +mo_ta: string
-    }
-
     class MatHang {
         +id: int
         +ten: string
@@ -417,30 +403,12 @@ classDiagram
         +thanh_tien: float
     }
 
-    class PhieuNhapHang {
-        +id: int
-        +nha_cung_cap_id: int
-        +ngay_nhap: date
-    }
-
-    class ChiTietPhieuNhap {
-        +id: int
-        +phieu_nhap_hang_id: int
-        +mat_hang_id: int
-        +so_luong: int
-        +don_gia: float
-        +thanh_tien: float
-    }
-
     KhachHang "1" --o "0..*" PhieuDatSan
     PhieuDatSan "1" --o "1..*" ChiTietDatSan
     SanBong "1" --o "0..*" ChiTietDatSan
     PhieuDatSan "1" --o "0..1" HoaDon
     HoaDon "1" --o "0..*" ChiTietSuDungMatHang
     MatHang "1" --o "0..*" ChiTietSuDungMatHang
-    NhaCungCap "1" --o "0..*" PhieuNhapHang
-    PhieuNhapHang "1" --o "0..*" ChiTietPhieuNhap
-    MatHang "1" --o "0..*" ChiTietPhieuNhap
 ```
 
 Các lớp trong hệ thống được thiết kế như sau:
@@ -452,16 +420,12 @@ Các lớp trong hệ thống được thiết kế như sau:
 - **HoaDon**: Đại diện cho bảng `hoa_don` (id, phieu_dat_san_id, ngay_thanh_toan, tong_tien, tien_thue_san, so_tien_thuc_tra, so_tien_con_lai).
 - **MatHang**: Đại diện cho bảng `mat_hang` (id, ten, don_vi, gia_ban).
 - **ChiTietSuDungMatHang**: Đại diện cho bảng `chi_tiet_su_dung_mat_hang` (id, hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien).
-- **NhaCungCap**: Đại diện cho bảng `nha_cung_cap` (id, ten, dia_chi, email, dien_thoai, mo_ta).
-- **PhieuNhapHang**: Đại diện cho bảng `phieu_nhap_hang` (id, nha_cung_cap_id, ngay_nhap).
-- **ChiTietPhieuNhap**: Đại diện cho bảng `chi_tiet_phieu_nhap` (id, phieu_nhap_hang_id, mat_hang_id, so_luong, don_gia, thanh_tien).
 
 Quan hệ giữa các lớp/bảng:
 - Mỗi khách hàng (`KhachHang`) có thể có nhiều phiếu đặt sân (`PhieuDatSan`).
 - Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (`ChiTietDatSan`), mỗi chi tiết liên kết với một sân bóng (`SanBong`).
 - Mỗi phiếu đặt sân có thể sinh ra một hóa đơn (`HoaDon`).
 - Mỗi hóa đơn có nhiều chi tiết sử dụng mặt hàng (`ChiTietSuDungMatHang`), mỗi chi tiết liên kết với một mặt hàng (`MatHang`).
-- Mỗi mặt hàng có thể xuất hiện trong nhiều phiếu nhập hàng (`ChiTietPhieuNhap`), mỗi phiếu nhập hàng thuộc về một nhà cung cấp (`NhaCungCap`).
 
 #### 2.2. Sơ đồ CSDL
 
@@ -474,9 +438,6 @@ Mô tả chi tiết các bảng, trường và quan hệ:
 - **hoa_don**: Hóa đơn thanh toán (id, phieu_dat_san_id, ngay_thanh_toan, tong_tien, tien_thue_san, so_tien_thuc_tra, so_tien_con_lai).
 - **mat_hang**: Đồ ăn, nước uống bán kèm (id, ten, don_vi, gia_ban).
 - **chi_tiet_su_dung_mat_hang**: Danh sách mặt hàng sử dụng mỗi buổi (id, hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien).
-- **nha_cung_cap**: Nguồn cung cấp mặt hàng (id, ten, dia_chi, email, dien_thoai, mo_ta).
-- **phieu_nhap_hang**: Hóa đơn nhập hàng (id, nha_cung_cap_id, ngay_nhap).
-- **chi_tiet_phieu_nhap**: Mặt hàng nhập cụ thể của 1 phiếu (id, phieu_nhap_hang_id, mat_hang_id, so_luong, don_gia, thanh_tien).
 
 Các ràng buộc khóa ngoại (FOREIGN KEY) đảm bảo tính toàn vẹn dữ liệu giữa các bảng:
 - `phieu_dat_san.khach_hang_id` → `khach_hang.id`
@@ -485,9 +446,6 @@ Các ràng buộc khóa ngoại (FOREIGN KEY) đảm bảo tính toàn vẹn d�
 - `hoa_don.phieu_dat_san_id` → `phieu_dat_san.id`
 - `chi_tiet_su_dung_mat_hang.hoa_don_id` → `hoa_don.id`
 - `chi_tiet_su_dung_mat_hang.mat_hang_id` → `mat_hang.id`
-- `phieu_nhap_hang.nha_cung_cap_id` → `nha_cung_cap.id`
-- `chi_tiet_phieu_nhap.phieu_nhap_hang_id` → `phieu_nhap_hang.id`
-- `chi_tiet_phieu_nhap.mat_hang_id` → `mat_hang.id`
 
 Sơ đồ ERD chi tiết:
 
@@ -556,39 +514,12 @@ erDiagram
         FLOAT thanh_tien
     }
 
-    nha_cung_cap {
-        INT id PK
-        STRING ten
-        STRING dia_chi
-        STRING email
-        STRING dien_thoai
-        STRING mo_ta
-    }
-
-    phieu_nhap_hang {
-        INT id PK
-        INT nha_cung_cap_id FK
-        DATE ngay_nhap
-    }
-
-    chi_tiet_phieu_nhap {
-        INT id PK
-        INT phieu_nhap_hang_id FK
-        INT mat_hang_id FK
-        INT so_luong
-        FLOAT don_gia
-        FLOAT thanh_tien
-    }
-
     khach_hang ||--o{ phieu_dat_san : dat
     phieu_dat_san ||--o{ chi_tiet_dat_san : gom
     san_bong ||--o{ chi_tiet_dat_san : duoc_dat
     phieu_dat_san ||--|| hoa_don : tao_hoa_don
     hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
     mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
-    nha_cung_cap ||--o{ phieu_nhap_hang : cung_cap
-    phieu_nhap_hang ||--o{ chi_tiet_phieu_nhap : co
-    mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
 ```
 
 ## Chương 3. Cài đặt và thử nghiệm hệ thống
