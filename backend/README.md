@@ -25,7 +25,7 @@ backend/
 ## III. Chạy server
 
 ```sh
-node server.js
+npm run dev
 ```
 
 ## IV. Test API

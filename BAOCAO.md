@@ -24,10 +24,22 @@ Hệ thống quản lý cho thuê sân bóng mini giúp tự động hóa quy tr
 - **TailwindCSS:**
   - Thiết kế giao diện nhanh, đồng bộ, responsive, dễ tùy biến theme.
   - Giảm code CSS lặp lại, tối ưu hiệu suất frontend.
-- **Heroicons:**
-  - Bộ icon hiện đại, dễ tích hợp với React, tăng tính trực quan cho UI.
 - **Axios:**
   - Giao tiếp API đơn giản, hỗ trợ Promise, xử lý lỗi tốt.
+- **Heroicons:**
+  - Bộ icon hiện đại, dễ tích hợp với React, tăng tính trực quan cho UI.
+
+Kiến trúc tổng quan hệ thống:
+
+```mermaid
+graph LR
+    User["Người dùng"]
+    FE["FE <br/> (React + Next.js)"]
+    BE["BE <br/> (Node.js + Express.js)"]
+    DB["DB <br/> (Sqlite)"]
+
+    User --> FE --> BE --> DB
+```
 
 ## Chương 2. Phân tích và thiết kế hệ thống
 
@@ -35,9 +47,9 @@ Hệ thống quản lý cho thuê sân bóng mini giúp tự động hóa quy tr
 
 #### 1.1. Tác nhân (Actor)
 
-- Quản trị viên (Admin): Có quyền quản lý sân bóng, xem thống kê doanh thu.
-- Nhân viên lễ tân: Thực hiện toàn bộ nghiệp vụ (quản lý sân, đặt sân, checkout, thanh toán, thống kê).
-- Khách hàng: Tác nhân gián tiếp, thông qua nhân viên để đặt sân, thanh toán.
+- **Quản trị viên (Admin)**: Có quyền quản lý sân bóng, xem thống kê doanh thu.
+- **Nhân viên lễ tân**: Thực hiện toàn bộ nghiệp vụ (quản lý sân, đặt sân, checkout, thanh toán, thống kê).
+- **Khách hàng**: Tác nhân gián tiếp, thông qua nhân viên để đặt sân, thanh toán.
 
 #### 1.2 Các use-case chính
 
@@ -109,9 +121,43 @@ graph LR
 
 #### 1.4. Kịch bản & ngoại lệ
 
+_todo_
+
 - Đặt sân trùng giờ: cảnh báo, không cho phép đặt
 - Thanh toán thiếu/dư: cập nhật trạng thái hóa đơn, hiển thị rõ trên UI
 - Xóa sân bóng đang có lịch đặt: cảnh báo, không cho phép xóa
+
+#### 1.5. Cơ sở dữ liệu mức logic
+
+Các thực thể chính trong hệ thống:
+
+| Thực thể                    | Vai trò                                                            |
+| --------------------------- | ------------------------------------------------------------------ |
+| `khach_hang`                | Người thuê sân                                                     |
+| `san_bong`                  | Thông tin các sân mini/lớn                                         |
+| `phieu_dat_san`             | Phiếu xác nhận đặt sân của khách hàng                              |
+| `chi_tiet_dat_san`          | Một dòng đặt sân cụ thể: sân nào, khung giờ, ngày bắt đầu/kết thúc |
+| `hoa_don`                   | Hóa đơn thanh toán cuối kỳ                                         |
+| `mat_hang`                  | Đồ ăn, nước uống bán kèm                                           |
+| `chi_tiet_su_dung_mat_hang` | Danh sách mặt hàng sử dụng mỗi buổi                                |
+| `nha_cung_cap`              | Nguồn cung cấp mặt hàng                                            |
+| `phieu_nhap_hang`           | Hóa đơn nhập hàng                                                  |
+| `chi_tiet_phieu_nhap`       | Mặt hàng nhập cụ thể của 1 phiếu                                   |
+
+Quan hệ giữa các thực thể:
+
+```mermaid
+erDiagram
+    khach_hang ||--o{ phieu_dat_san : dat
+    phieu_dat_san ||--o{ chi_tiet_dat_san : gom
+    san_bong ||--o{ chi_tiet_dat_san : duoc_dat
+    phieu_dat_san ||--|| hoa_don : tao_hoa_don
+    hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
+    mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
+    nha_cung_cap ||--o{ phieu_nhap_hang : cung_cap
+    phieu_nhap_hang ||--o{ chi_tiet_phieu_nhap : co
+    mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
+```
 
 ### 2. Thiết kế hệ thống
 
@@ -301,16 +347,15 @@ Giải thích:
 classDiagram
     class SanBong {
         +id: int
-        +ten: string
-        +loai: string
-        +trangThai: string
-        +viTri: string
+        +ten_san: string
+        +loai_san: string
+        +mo_ta: string
+        +gia_thue_theo_gio: float
     }
 
     class KhachHang {
         +id: int
-        +ten: string
-        +diaChi: string
+        +ho_ten: string
         +sdt: string
         +email: string
     }
@@ -318,130 +363,305 @@ classDiagram
     class NhaCungCap {
         +id: int
         +ten: string
-        +diaChi: string
+        +dia_chi: string
         +email: string
-        +sdt: string
-        +moTa: string
+        +dien_thoai: string
+        +mo_ta: string
     }
 
     class MatHang {
         +id: int
         +ten: string
-        +donGia: float
-        +nhaCungCapId: int
+        +don_vi: string
+        +gia_ban: float
     }
 
     class PhieuDatSan {
         +id: int
-        +ngayDat: date
-        +ngayBatDau: date
-        +ngayKetThuc: date
-        +tongTienDuKien: float
-        +tienDatCoc: float
-        +trangThai: string
-        +khachHangId: int
+        +khach_hang_id: int
+        +ngay_dat: date
+        +tong_tien_du_kien: float
+        +tien_dat_coc: float
     }
 
     class ChiTietDatSan {
         +id: int
-        +phieuDatSanId: int
-        +sanBongId: int
-        +khungGio: string
-        +giaThue: float
-        +soBuoi: int
+        +phieu_dat_san_id: int
+        +san_bong_id: int
+        +gio_bat_dau: string
+        +gio_ket_thuc: string
+        +ngay_bat_dau: date
+        +ngay_ket_thuc: date
+        +gia_thue_theo_gio: float
+        +gio_nhan_san: string
+        +gio_tra_san: string
     }
 
     class HoaDon {
         +id: int
-        +phieuDatSanId: int
-        +ngayLap: date
-        +tongTien: float
-        +daTra: float
-        +conNo: float
-        +trangThai: string
+        +phieu_dat_san_id: int
+        +ngay_thanh_toan: date
+        +tong_tien: float
+        +tien_thue_san: float
+        +so_tien_thuc_tra: float
+        +so_tien_con_lai: float
     }
 
-    class ChiTietHoaDon {
+    class ChiTietSuDungMatHang {
         +id: int
-        +hoaDonId: int
-        +matHangId: int
-        +soLuong: int
-        +donGia: float
-        +thanhTien: float
+        +hoa_don_id: int
+        +ngay_su_dung: date
+        +mat_hang_id: int
+        +so_luong: int
+        +gia_ban: float
+        +thanh_tien: float
+    }
+
+    class PhieuNhapHang {
+        +id: int
+        +nha_cung_cap_id: int
+        +ngay_nhap: date
+    }
+
+    class ChiTietPhieuNhap {
+        +id: int
+        +phieu_nhap_hang_id: int
+        +mat_hang_id: int
+        +so_luong: int
+        +don_gia: float
+        +thanh_tien: float
     }
 
     KhachHang "1" --o "0..*" PhieuDatSan
     PhieuDatSan "1" --o "1..*" ChiTietDatSan
-    PhieuDatSan "1" --o "0..1" HoaDon
-    HoaDon "1" --o "0..*" ChiTietHoaDon
-    MatHang "1" --o "0..*" ChiTietHoaDon
-    NhaCungCap "1" --o "0..*" MatHang
     SanBong "1" --o "0..*" ChiTietDatSan
+    PhieuDatSan "1" --o "0..1" HoaDon
+    HoaDon "1" --o "0..*" ChiTietSuDungMatHang
+    MatHang "1" --o "0..*" ChiTietSuDungMatHang
+    NhaCungCap "1" --o "0..*" PhieuNhapHang
+    PhieuNhapHang "1" --o "0..*" ChiTietPhieuNhap
+    MatHang "1" --o "0..*" ChiTietPhieuNhap
 ```
 
 Các lớp trong hệ thống được thiết kế như sau:
 
-- **SanBong**: Đại diện cho sân bóng (có thể có thuộc tính để phân biệt sân mini/lớn, trạng thái, vị trí, ...)
-- **KhachHang**: Thông tin khách hàng (tên, địa chỉ, SĐT, email, ...)
-- **PhieuDatSan**: Phiếu đặt sân (ngày đặt, ngày bắt đầu, ngày kết thúc, tổng tiền dự kiến, số tiền đặt cọc, trạng thái, ...)
-- **ChiTietDatSan**: Chi tiết từng sân mini trong một phiếu đặt (mã sân, khung giờ, giá thuê, số buổi, ...)
-- **HoaDon**: Hóa đơn thanh toán (ngày lập, tổng tiền, số tiền đã trả, số tiền còn nợ, trạng thái, ...)
-- **MatHang**: Mặt hàng bán kèm (mã, tên, đơn giá, nhà cung cấp, ...)
-- **ChiTietHoaDon**: Chi tiết mặt hàng đã dùng trong từng buổi (mã mặt hàng, số lượng, đơn giá, thành tiền, ...)
-- **NhaCungCap**: Thông tin nhà cung cấp mặt hàng (mã, tên, địa chỉ, SĐT, email, ...)
+- **SanBong**: Đại diện cho bảng `san_bong` (id, ten_san, loai_san, mo_ta, gia_thue_theo_gio).
+- **KhachHang**: Đại diện cho bảng `khach_hang` (id, ho_ten, sdt, email).
+- **PhieuDatSan**: Đại diện cho bảng `phieu_dat_san` (id, khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc).
+- **ChiTietDatSan**: Đại diện cho bảng `chi_tiet_dat_san` (id, phieu_dat_san_id, san_bong_id, gio_bat_dau, gio_ket_thuc, ngay_bat_dau, ngay_ket_thuc, gia_thue_theo_gio, gio_nhan_san, gio_tra_san).
+- **HoaDon**: Đại diện cho bảng `hoa_don` (id, phieu_dat_san_id, ngay_thanh_toan, tong_tien, tien_thue_san, so_tien_thuc_tra, so_tien_con_lai).
+- **MatHang**: Đại diện cho bảng `mat_hang` (id, ten, don_vi, gia_ban).
+- **ChiTietSuDungMatHang**: Đại diện cho bảng `chi_tiet_su_dung_mat_hang` (id, hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien).
+- **NhaCungCap**: Đại diện cho bảng `nha_cung_cap` (id, ten, dia_chi, email, dien_thoai, mo_ta).
+- **PhieuNhapHang**: Đại diện cho bảng `phieu_nhap_hang` (id, nha_cung_cap_id, ngay_nhap).
+- **ChiTietPhieuNhap**: Đại diện cho bảng `chi_tiet_phieu_nhap` (id, phieu_nhap_hang_id, mat_hang_id, so_luong, don_gia, thanh_tien).
 
-Quan hệ giữa các lớp:
-- Mỗi khách hàng có thể có nhiều phiếu đặt sân.
-- Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (tương ứng từng sân, từng khung giờ).
-- Mỗi phiếu đặt sân có thể sinh ra một hóa đơn.
-- Mỗi hóa đơn có nhiều chi tiết hóa đơn (các mặt hàng đã dùng).
-- Mỗi mặt hàng thuộc về một nhà cung cấp.
-- Mỗi chi tiết hóa đơn liên kết với một mặt hàng.
-- Mỗi chi tiết đặt sân liên kết với một sân bóng.
+Quan hệ giữa các lớp/bảng:
+- Mỗi khách hàng (`KhachHang`) có thể có nhiều phiếu đặt sân (`PhieuDatSan`).
+- Mỗi phiếu đặt sân có nhiều chi tiết đặt sân (`ChiTietDatSan`), mỗi chi tiết liên kết với một sân bóng (`SanBong`).
+- Mỗi phiếu đặt sân có thể sinh ra một hóa đơn (`HoaDon`).
+- Mỗi hóa đơn có nhiều chi tiết sử dụng mặt hàng (`ChiTietSuDungMatHang`), mỗi chi tiết liên kết với một mặt hàng (`MatHang`).
+- Mỗi mặt hàng có thể xuất hiện trong nhiều phiếu nhập hàng (`ChiTietPhieuNhap`), mỗi phiếu nhập hàng thuộc về một nhà cung cấp (`NhaCungCap`).
 
 #### 2.2. Sơ đồ CSDL
 
-  - Các bảng: san_bong, khach_hang, phieu_dat_san, chi_tiet_dat_san, hoa_don, mat_hang, chi_tiet_hoa_don
+Mô tả chi tiết các bảng, trường và quan hệ:
+
+- **khach_hang**: Lưu thông tin khách hàng (id, ho_ten, sdt, email).
+- **san_bong**: Thông tin các sân bóng (id, ten_san, loai_san, mo_ta, gia_thue_theo_gio).
+- **phieu_dat_san**: Phiếu xác nhận đặt sân của khách hàng (id, khach_hang_id, ngay_dat, tong_tien_du_kien, tien_dat_coc).
+- **chi_tiet_dat_san**: Chi tiết từng lần đặt sân (id, phieu_dat_san_id, san_bong_id, gio_bat_dau, gio_ket_thuc, ngay_bat_dau, ngay_ket_thuc, gia_thue_theo_gio, gio_nhan_san, gio_tra_san).
+- **hoa_don**: Hóa đơn thanh toán (id, phieu_dat_san_id, ngay_thanh_toan, tong_tien, tien_thue_san, so_tien_thuc_tra, so_tien_con_lai).
+- **mat_hang**: Đồ ăn, nước uống bán kèm (id, ten, don_vi, gia_ban).
+- **chi_tiet_su_dung_mat_hang**: Danh sách mặt hàng sử dụng mỗi buổi (id, hoa_don_id, ngay_su_dung, mat_hang_id, so_luong, gia_ban, thanh_tien).
+- **nha_cung_cap**: Nguồn cung cấp mặt hàng (id, ten, dia_chi, email, dien_thoai, mo_ta).
+- **phieu_nhap_hang**: Hóa đơn nhập hàng (id, nha_cung_cap_id, ngay_nhap).
+- **chi_tiet_phieu_nhap**: Mặt hàng nhập cụ thể của 1 phiếu (id, phieu_nhap_hang_id, mat_hang_id, so_luong, don_gia, thanh_tien).
+
+Các ràng buộc khóa ngoại (FOREIGN KEY) đảm bảo tính toàn vẹn dữ liệu giữa các bảng:
+- `phieu_dat_san.khach_hang_id` → `khach_hang.id`
+- `chi_tiet_dat_san.phieu_dat_san_id` → `phieu_dat_san.id`
+- `chi_tiet_dat_san.san_bong_id` → `san_bong.id`
+- `hoa_don.phieu_dat_san_id` → `phieu_dat_san.id`
+- `chi_tiet_su_dung_mat_hang.hoa_don_id` → `hoa_don.id`
+- `chi_tiet_su_dung_mat_hang.mat_hang_id` → `mat_hang.id`
+- `phieu_nhap_hang.nha_cung_cap_id` → `nha_cung_cap.id`
+- `chi_tiet_phieu_nhap.phieu_nhap_hang_id` → `phieu_nhap_hang.id`
+- `chi_tiet_phieu_nhap.mat_hang_id` → `mat_hang.id`
+
+Sơ đồ ERD chi tiết:
+
+```mermaid
+erDiagram
+    khach_hang {
+        INT id PK
+        STRING ho_ten
+        STRING sdt
+        STRING email
+    }
+
+    san_bong {
+        INT id PK
+        STRING ten_san
+        STRING loai_san
+        STRING mo_ta
+        FLOAT gia_thue_theo_gio
+    }
+
+    phieu_dat_san {
+        INT id PK
+        INT khach_hang_id FK
+        DATE ngay_dat
+        FLOAT tong_tien_du_kien
+        FLOAT tien_dat_coc
+    }
+
+    chi_tiet_dat_san {
+        INT id PK
+        INT phieu_dat_san_id FK
+        INT san_bong_id FK
+        TIME gio_bat_dau
+        TIME gio_ket_thuc
+        DATE ngay_bat_dau
+        DATE ngay_ket_thuc
+        TIME gio_nhan_san
+        TIME gio_tra_san
+        FLOAT gia_thue_theo_gio
+    }
+
+    hoa_don {
+        INT id PK
+        INT phieu_dat_san_id FK
+        DATE ngay_thanh_toan
+        FLOAT tong_tien
+        FLOAT tien_thue_san
+        FLOAT so_tien_thuc_tra
+        FLOAT so_tien_con_lai
+    }
+
+    mat_hang {
+        INT id PK
+        STRING ten
+        STRING don_vi
+        FLOAT gia_ban
+    }
+
+    chi_tiet_su_dung_mat_hang {
+        INT id PK
+        INT hoa_don_id FK
+        DATE ngay_su_dung
+        INT mat_hang_id FK
+        INT so_luong
+        FLOAT gia_ban
+        FLOAT thanh_tien
+    }
+
+    nha_cung_cap {
+        INT id PK
+        STRING ten
+        STRING dia_chi
+        STRING email
+        STRING dien_thoai
+        STRING mo_ta
+    }
+
+    phieu_nhap_hang {
+        INT id PK
+        INT nha_cung_cap_id FK
+        DATE ngay_nhap
+    }
+
+    chi_tiet_phieu_nhap {
+        INT id PK
+        INT phieu_nhap_hang_id FK
+        INT mat_hang_id FK
+        INT so_luong
+        FLOAT don_gia
+        FLOAT thanh_tien
+    }
+
+    khach_hang ||--o{ phieu_dat_san : dat
+    phieu_dat_san ||--o{ chi_tiet_dat_san : gom
+    san_bong ||--o{ chi_tiet_dat_san : duoc_dat
+    phieu_dat_san ||--|| hoa_don : tao_hoa_don
+    hoa_don ||--o{ chi_tiet_su_dung_mat_hang : gom
+    mat_hang ||--o{ chi_tiet_su_dung_mat_hang : su_dung
+    nha_cung_cap ||--o{ phieu_nhap_hang : cung_cap
+    phieu_nhap_hang ||--o{ chi_tiet_phieu_nhap : co
+    mat_hang ||--o{ chi_tiet_phieu_nhap : duoc_nhap
+```
 
 ## Chương 3. Cài đặt và thử nghiệm hệ thống
 
 ### 3.1. Cài đặt
 
-#### Backend
-- Cài Node.js, clone source code
+#### 3.1.1. Chuẩn bị môi trường
+
+- Cài đặt Node.js (phiên bản >= 14)
+- Cài đặt SQLite (phiên bản >= 3.31)
+- Cài đặt Git để clone source code
+- Cài đặt curl để thử nghiệm API
+
+#### 3.1.2. Cơ sở dữ liệu
+
+Tạo CSDL SQLite: tạo file `db/qlsb.db` bằng lệnh sau:
+```bash
+sqlite3 db/qlsb.db < db/schema.sql
+```
+
+Khởi tạo dữ liệu mẫu:
+```bash
+sqlite3 db/qlsb.db < db/seed.sql
+```
+
+#### 3.1.3. Backend
+
+- Vào thư mục backend: `cd backend`
 - Cài dependencies: `npm install` trong thư mục backend
-- Khởi động server: `npm start` (port mặc định 3001)
-- CSDL SQLite: file `db/qlsb.db`, có sẵn script tạo bảng và seed dữ liệu
+- Khởi động server: `npm run dev` (port mặc định 5000)
 
 #### Frontend
-- Cài Node.js, clone source code
+
+- Vào thư mục frontend: `cd frontend`
 - Cài dependencies: `npm install` trong thư mục frontend
 - Chạy: `npm run dev` (port mặc định 3000)
-- Cài thêm: `npm install @heroicons/react` để hiển thị icon
+- Truy cập giao diện: `http://localhost:3000`
 
-### 2. Thử nghiệm
+### 3.2. Thử nghiệm
 
-#### Backend
-- Thử nghiệm API bằng curl hoặc Postman:
+#### 3.2.1. Cơ sở dữ liệu
+
+Truy cập CSDL SQLite để kiểm tra dữ liệu:
+```bash
+sqlite3 db/qlsb.db
+```
+
+Thực hiện các truy vấn SQL để kiểm tra dữ liệu.
+
+#### 3.2.2. Backend
+
+- Thử nghiệm API bằng curl:
   - GET/POST/PUT/DELETE các route `/sanbong`, `/datsan`, `/checkout`, `/thanh-toan`, `/thongke`
   - Ví dụ: `curl http://localhost:3001/api/sanbong`
 
 #### Frontend
-- Truy cập các trang:
+
+- Truy cập giao diện web tại `http://localhost:3000`, thực hiện các tính năng:
+  - Tìm kiếm sân bóng, thêm/sửa/xóa sân
+  - Đặt sân, chọn khách hàng, xác nhận đặt
+  - Checkout mặt hàng đã dùng, cập nhật hóa đơn
+  - Thanh toán hóa đơn, nhập số tiền khách trả
+  - Xem thống kê doanh thu, chi tiết hóa đơn
+
+- Hoặc truy cập trực tiếp các trang:
   - `/san-bong`: Quản lý sân bóng (thêm, sửa, xóa, tìm kiếm)
   - `/dat-san`: Đặt sân (tìm sân trống, chọn khách, xác nhận đặt)
   - `/checkout`: Quản lý mặt hàng, cập nhật hóa đơn
   - `/thanh-toan`: Thanh toán hóa đơn, nhập số tiền khách trả, xem trạng thái thanh toán
   - `/thong-ke`: Thống kê doanh thu, xem biểu đồ, bảng tổng hợp, chi tiết hóa đơn
-- Kiểm thử các trường hợp:
+
+- Kiểm thử các trường hợp bổ sung:
   - Đặt sân trùng giờ, đặt nhiều ngày, đặt cho khách mới/cũ
   - Thêm/xóa/sửa mặt hàng khi checkout
   - Thanh toán thiếu/dư, kiểm tra trạng thái hóa đơn
   - Xem thống kê doanh thu theo tháng/năm, xem chi tiết hóa đơn
-
----
-
-**Ghi chú:**
-- Giao diện đã được chuẩn hóa, đồng bộ layout, tối ưu trải nghiệm người dùng.
-- Logic nghiệp vụ thanh toán, đồng bộ dữ liệu, reload sau thao tác đã được kiểm thử kỹ.
-- Có thể mở rộng thêm các chức năng quản lý nhân viên, phân quyền, xuất báo cáo PDF, v.v.

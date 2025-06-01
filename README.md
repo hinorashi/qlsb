@@ -248,9 +248,12 @@ erDiagram
         INT id PK
         INT phieu_dat_san_id FK
         INT san_bong_id FK
-        TIME khung_gio
+        TIME gio_bat_dau
+        TIME gio_ket_thuc
         DATE ngay_bat_dau
         DATE ngay_ket_thuc
+        TIME gio_nhan_san
+        TIME gio_tra_san
         FLOAT gia_thue_theo_gio
     }
 
@@ -259,6 +262,7 @@ erDiagram
         INT phieu_dat_san_id FK
         DATE ngay_thanh_toan
         FLOAT tong_tien
+        FLOAT tien_thue_san
         FLOAT so_tien_thuc_tra
         FLOAT so_tien_con_lai
     }
